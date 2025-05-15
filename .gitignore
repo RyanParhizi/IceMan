@@ -1,0 +1,15 @@
+# Ignore everything
+*
+
+# Allow these directories
+!IceMan-skeleton/
+!IceMan-skeleton/IceMan/
+
+# Allow only these files in that directory
+!IceMan-skeleton/IceMan/Actor.h
+!IceMan-skeleton/IceMan/Actor.cpp
+!IceMan-skeleton/IceMan/StudentWorld.h
+!IceMan-skeleton/IceMan/StudentWorld.cpp
+
+# Allow the .gitignore itself
+!.gitignore
