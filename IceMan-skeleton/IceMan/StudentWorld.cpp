@@ -1,8 +1,7 @@
 #include "StudentWorld.h"
 #include <string>
-using namespace std;
 
-GameWorld* createStudentWorld(string assetDir)
+GameWorld* createStudentWorld(std::string assetDir)
 {
 	return new StudentWorld(assetDir);
 }

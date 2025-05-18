@@ -17,12 +17,16 @@ public:
 
     virtual void doSomething () = 0;
     
-    void setAlive(bool alive) {
-        isAlive = alive;
+    void setAlive(bool alive_) {
+        alive = alive_;
     }
+    bool isAlive(){
+        return alive; 
+    }
+    
 
 private:
-    bool isAlive = true;
+    bool alive = true;
 };
 
 class Ice : public Actor {
@@ -49,9 +53,23 @@ private:
 class Iceman : public Person {
 public:
     Iceman()
-    : Person(IID_PLAYER, 30, 60, ...) // TO_DO
-private:
+    : Person(IID_PLAYER, 30, 60, right, 1.0, 0) {
+     hitPoints = 10; 
+     squirtCount = 5;
+     sonarCount = 1;
+     goldCount = 0;
+    }
 
+    void doSomething() override {
+        if(!(isAlive())){return;}
+
+
+    }
+private:
+    int hitPoints;
+    int squirtCount;
+    int sonarCount;
+    int goldCount;
 };
 
 
