@@ -43,21 +43,25 @@ public:
 	void playerRemoveIce();
 
 private:
-    std::array<std::array<Ice*, 59>, 64> iceGrid;
+    std::array<std::array<Ice*, 59>, 64> iceGrid{ nullptr }; //Without this nullptr initializer, weird stuff happens
 	//pointer to Iceman
 	//Vector to other game objects pointers (actor pointers)
     
     void iceGridAction(bool option){
         int colN = 0;
-        int rowN = 0;
-        for(auto iceCol : iceGrid){
-            for(auto iceBlock : iceCol){
-                if((colN < 30 || colN > 33) && rowN < 4){
+        for(auto &iceCol : iceGrid){
+            int rowN = 0;
+            for(auto &iceBlock : iceCol){
+                if (colN == 30) {
+                    int i = 0;
+                };
+                if(colN < 30 || colN > 33 || rowN < 4){
 					if(option){
                     iceBlock = new Ice(colN, rowN);
 					}
 					else{
-					delete iceBlock; 
+					delete iceBlock;
+                    iceBlock = nullptr;
 					}
                 }
                 rowN++;
