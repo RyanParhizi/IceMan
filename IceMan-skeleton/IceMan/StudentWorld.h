@@ -19,7 +19,7 @@ public:
     }
 	//should the base class destructor be explicitly be called? 
 	~StudentWorld(){
-		iceGridAction(0);
+        cleanUp();
 	}
     
     virtual int init()
@@ -38,16 +38,17 @@ public:
     
     virtual void cleanUp()
     {
+        iceGridAction(0);
     }
 
 	void playerRemoveIce();
 
 private:
-    std::array<std::array<Ice*, 59>, 64> iceGrid{ nullptr }; //Without this nullptr initializer, weird stuff happens
+    std::array<std::array<Ice*, 59>, 64> iceGrid{ nullptr };
 	//pointer to Iceman
 	//Vector to other game objects pointers (actor pointers)
     
-    void iceGridAction(bool option){
+    void iceGridAction(bool option){ // Temporarily disabled for testing
         int colN = 0;
         for(auto &iceCol : iceGrid){
             int rowN = 0;

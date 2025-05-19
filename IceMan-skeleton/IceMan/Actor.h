@@ -13,9 +13,9 @@ public:
         setVisible(true);
     }
     
-    ~Actor() {}
+    virtual ~Actor() {}
 
-    virtual void doSomething () = 0;
+    virtual void doSomething() {}
     
     void setAlive(bool alive_) {
         alive = alive_;
@@ -34,6 +34,8 @@ public:
     Ice(int startX, int startY)
     : Actor(IID_ICE, startX, startY, right, 0.25, 3) {}
     
+    virtual ~Ice() {}
+
     void doSomething() override {}
 };
 
@@ -42,12 +44,14 @@ public:
     Person(int imageID, int startX, int startY, Direction dir = right, double size = 1.0, unsigned int depth = 0)
     : Actor(imageID, startX, startY, dir, size, depth) {}
 
+    virtual ~Person() {}
+
     void annoy(int damage) {
         hitPoints -= damage;
     }
 
 private:
-    int hitPoints;
+    int hitPoints = 0;
 };
 
 class Iceman : public Person {
@@ -59,6 +63,8 @@ public:
      sonarCount = 1;
      goldCount = 0;
     }
+
+    virtual ~Iceman() {}
 
     void doSomething() override {
         if(!(isAlive())){return;}
