@@ -71,6 +71,7 @@ protected:
             }
             moveTo(getX() + dx, getY() + dy);
         }
+        return;
     }
 
 private:
