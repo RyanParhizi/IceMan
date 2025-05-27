@@ -5,7 +5,6 @@
 #include "GameConstants.h"
 #include <string>
 #include "Actor.h"
-
 #include <array>
 
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
