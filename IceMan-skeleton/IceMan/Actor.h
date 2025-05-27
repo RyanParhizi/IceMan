@@ -50,14 +50,39 @@ public:
         hitPoints -= damage;
     }
 
+protected:
+    
+    void processMovementInput(Direction inDir) {
+        if (getDirection() != inDir) {
+            setDirection(inDir);
+        }
+        else {
+            int dx = 0;
+            int dy = 0;
+            switch (inDir) {
+            case right:
+                dx = 1;
+            case left:
+                dx = -1;
+            case up:
+                dy = 1;
+            case down:
+                dy = -1;
+            }
+            moveTo(getX() + dx, getY() + dy);
+        }
+        return;
+    }
+
 private:
     int hitPoints = 0;
 };
 
 class Iceman : public Person {
 public:
-    Iceman()
-    : Person(IID_PLAYER, 30, 60, right, 1.0, 0) {
+    Iceman(const int& keyRef)
+    : Person(IID_PLAYER, 30, 60, right, 1.0, 0), key(keyRef) {
+
      hitPoints = 10; 
      squirtCount = 5;
      sonarCount = 1;
@@ -67,11 +92,24 @@ public:
     virtual ~Iceman() {}
 
     void doSomething() override {
-        if(!(isAlive())){return;}
+        if (!isAlive()) { return; }
 
-
+        switch(key) {
+        case KEY_PRESS_RIGHT:
+            processMovementInput(right);
+        case KEY_PRESS_LEFT:
+            processMovementInput(left);
+        case KEY_PRESS_UP:
+            processMovementInput(up);
+        case KEY_PRESS_DOWN:
+            processMovementInput(down);
+        }
     }
+
 private:
+
+    const int& key;
+
     int hitPoints;
     int squirtCount;
     int sonarCount;
