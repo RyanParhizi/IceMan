@@ -24,6 +24,7 @@ public:
     
     virtual int init()
     {
+        player = new Iceman(1001);
         iceGridAction(1);
         return GWSTATUS_CONTINUE_GAME;
     }
@@ -32,18 +33,25 @@ public:
     {
         // This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
         // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
-        decLives();
-        return GWSTATUS_PLAYER_DIED;
+        if(!getKey(keyStorage)){
+            keyStorage = 0;
+        }
+        player->doSomething();
+        return GWSTATUS_CONTINUE_GAME;
     }
     
     virtual void cleanUp()
     {
+        delete player;
+        player = nullptr;
         iceGridAction(0);
     }
 
 	void playerRemoveIce();
 
 private:
+    Iceman* player = nullptr;
+    int keyStorage = 0;
     std::array<std::array<Ice*, 59>, 64> iceGrid{ nullptr };
 	//pointer to Iceman
 	//Vector to other game objects pointers (actor pointers)
@@ -53,9 +61,6 @@ private:
         for(auto &iceCol : iceGrid){
             int rowN = 0;
             for(auto &iceBlock : iceCol){
-                if (colN == 30) {
-                    int i = 0;
-                };
                 if(colN < 30 || colN > 33 || rowN < 4){
 					if(option){
                     iceBlock = new Ice(colN, rowN);
