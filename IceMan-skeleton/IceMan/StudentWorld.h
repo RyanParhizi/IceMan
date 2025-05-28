@@ -13,49 +13,48 @@ class StudentWorld : public GameWorld
 {
 public:
     StudentWorld(std::string assetDir)
-    : GameWorld(assetDir)
-    {
+        : GameWorld(assetDir) {
+
     }
-	//should the base class destructor be explicitly be called? 
-	~StudentWorld(){
+
+    ~StudentWorld() {
         cleanUp();
 	}
     
-    virtual int init()
-    {
-        player = new Iceman(1001);
+    virtual int init() {
+        player = new Iceman(keyStorage);
+
         iceGridAction(1);
+        
         return GWSTATUS_CONTINUE_GAME;
     }
     
-    virtual int move()
-    {
-        // This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
-        // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
+    virtual int move() {
         if(!getKey(keyStorage)){
             keyStorage = 0;
         }
         player->doSomething();
+        
         return GWSTATUS_CONTINUE_GAME;
     }
     
-    virtual void cleanUp()
-    {
+    virtual void cleanUp() {
         delete player;
         player = nullptr;
+
         iceGridAction(0);
     }
 
-	void playerRemoveIce();
-
 private:
-    Iceman* player = nullptr;
     int keyStorage = 0;
-    std::array<std::array<Ice*, 59>, 64> iceGrid{ nullptr };
-	//pointer to Iceman
+    Iceman* player = nullptr;
+
+    std::array<std::array<Ice*, 60>, 64> iceGrid{ nullptr };
+
 	//Vector to other game objects pointers (actor pointers)
     
-    void iceGridAction(bool option){ // Temporarily disabled for testing
+
+    void iceGridAction(bool option){ // Option 1 creates ice field. Option 0 destroys ice field.
         int colN = 0;
         for(auto &iceCol : iceGrid){
             int rowN = 0;
@@ -75,4 +74,5 @@ private:
         }
     }
 };
+
 #endif // STUDENTWORLD_H_
