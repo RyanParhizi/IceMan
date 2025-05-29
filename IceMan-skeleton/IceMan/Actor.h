@@ -9,7 +9,7 @@ class Actor : public GraphObject
 {
 public:
     Actor(int imageID, int startX, int startY, Direction dir = right, double size = 1.0, unsigned int depth = 0)
-    : GraphObject(imageID, startX, startY, dir, size, depth) {
+        : GraphObject(imageID, startX, startY, dir, size, depth) {
         setVisible(true);
     }
     
@@ -24,7 +24,6 @@ public:
         return alive; 
     }
     
-
 private:
     bool alive = true;
 };
@@ -32,7 +31,7 @@ private:
 class Ice : public Actor {
 public:
     Ice(int startX, int startY)
-    : Actor(IID_ICE, startX, startY, right, 0.25, 3) {}
+        : Actor(IID_ICE, startX, startY, right, 0.25, 3) {}
     
     virtual ~Ice() {}
 
@@ -42,7 +41,7 @@ public:
 class Person : public Actor {
 public:
     Person(int imageID, int startX, int startY, Direction dir = right, double size = 1.0, unsigned int depth = 0)
-    : Actor(imageID, startX, startY, dir, size, depth) {}
+        : Actor(imageID, startX, startY, dir, size, depth) {}
 
     virtual ~Person() {}
 
@@ -62,26 +61,36 @@ protected:
             switch (inDir) {
             case right:
                 dx = 1;
+                break;
             case left:
                 dx = -1;
+                break;
             case up:
                 dy = 1;
+                break;
             case down:
                 dy = -1;
+                break;
             }
-            moveTo(getX() + dx, getY() + dy);
+            moveTo(coordClamp(getX() + dx), coordClamp(getY() + dy));
         }
         return;
     }
 
 private:
     int hitPoints = 0;
+
+    int coordClamp(int&& coord) {
+        if (coord < 0) { coord = 0; }
+        if (coord > 60) { coord = 60; }
+        return coord;
+    }
 };
 
 class Iceman : public Person {
 public:
     Iceman(const int& keyRef)
-    : Person(IID_PLAYER, 30, 60, right, 1.0, 0), key(keyRef) {
+        : Person(IID_PLAYER, 30, 60, right, 1.0, 0), key(keyRef) {
 
      hitPoints = 10; 
      squirtCount = 5;
@@ -97,12 +106,16 @@ public:
         switch(key) {
         case KEY_PRESS_RIGHT:
             processMovementInput(right);
+            break;
         case KEY_PRESS_LEFT:
             processMovementInput(left);
+            break;
         case KEY_PRESS_UP:
             processMovementInput(up);
+            break;
         case KEY_PRESS_DOWN:
             processMovementInput(down);
+            break;
         }
     }
 
