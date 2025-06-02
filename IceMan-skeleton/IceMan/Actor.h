@@ -57,24 +57,16 @@ private:
 class Goodies : public Actor {
 
 public:
-    Goodies(int imageID, int startX, int startY, unsigned int depth = 2)
+    Goodies(int imageID, int startX, int startY, unsigned int depth = 2) //pass reference to the iceman, this way we can keep track of location and increment inventory
     : Actor(imageID, startX, startY, right, 1.0, depth)
     {
         state = true;
     }
 
-    virtual ~Goodies() {}
-
-    virtual void doSomething() override = 0;
-
-    bool isVisibleToIceman() const {
-        return state;
-    }
-
-    void setVisibleToIceman(bool s) {
-        state = s;
-        setVisible(s);
-    }
+    virtual ~Goodies();
+    virtual void doSomething() override = 0; // in goodies do the collision check with the location of the goodie object and the location of iceman, if collision, setvisble to false and setisalive to false, 
+    bool isVisibleToIceman();
+    void setVisibleToIceman(bool s);
 
 private:
     bool state;
@@ -83,42 +75,9 @@ private:
 class GoldNugget : public Goodies {
 public:
     GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
-    : Goodies(IID_GOLD, startX, startY, 2)
-    {
-        m_temporary = temporary;
-        m_lifetime = lifetime;
-        if (!temporary) {
-            setVisible(false); 
-        } else {
-            setVisible(true);
-        }
-    }    
+    : Goodies(IID_GOLD, startX, startY, 2);
 
-    virtual ~GoldNugget() {}
-
-    void doSomething() override
-    {
-        if (!isAlive()) {
-            return;
-        }
-
-        if (m_temporary) {
-            if (--m_lifetime <= 0) {
-                setAlive(false);
-                return;
-            }
-
-            // Add logic to detect if Proteste picks up the gold
-            // If so, give score, setAlive(false), play sound
-        } else {
-            // Add logic to check if Iceman is close enough
-            // if so give gold to player, increase score, setAlive(false), play sound
-        }
-    }
-
-private:
-    bool m_temporary;
-    int m_lifetime;
-};
+    virtual ~GoldNugget();
+    void doSomething() override;
 
 #endif // ACTOR_H_

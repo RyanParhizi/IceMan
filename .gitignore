@@ -10,6 +10,6 @@
 !IceMan-skeleton/IceMan/Actor.cpp
 !IceMan-skeleton/IceMan/StudentWorld.h
 !IceMan-skeleton/IceMan/StudentWorld.cpp
-
+!notes.txt
 # Allow the .gitignore itself
 !.gitignore

@@ -1,0 +1,2 @@
+pass reference to the iceman in the goodies constructor, this way we can keep track of location and increment inventory
+in the move method of student world iterate over the actor vector (contains boulders, squirts, gun, goodies, etc) and run each of the dosomethings for each object
