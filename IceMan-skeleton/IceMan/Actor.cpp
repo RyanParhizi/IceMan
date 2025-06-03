@@ -94,16 +94,3 @@ void Iceman::doSomething()  {
         break;
     }
 }
-
-    Goodies::~Goodies() {}
-
-    void Goodies::doSomething() override = 0;
-
-    bool Goodies::isVisibleToIceman() const {
-        return state;
-    }
-
-    void Goodies::setVisibleToIceman(bool s) {
-        state = s;
-        setVisible(s);
-    }
