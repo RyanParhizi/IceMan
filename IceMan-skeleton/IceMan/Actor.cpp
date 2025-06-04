@@ -95,47 +95,52 @@ void Iceman::doSomething()  {
     }
 }
 
-    Goodies::~Goodies() {}
+Goodies::Goodies(int imageID, int startX, int startY, Iceman& playerRef, unsigned int depth)
+    : Actor(imageID, startX, startY, right, 1.0, depth), player(playerRef) {
+    state = true;
+}
 
-    bool Goodies::ispermanent() const {
-        return state;
-    }
+Goodies::~Goodies() {}
 
-    void Goodies::setVisibleToIceman(bool s) {
-        state = s;
-        setVisible(s);
-    }
+bool Goodies::ispermanent() const {
+    return state;
+}
 
-    GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
-    : Goodies(IID_GOLD, startX, startY, 2)
-    {
-        m_temporary = temporary;
-        m_lifetime = lifetime;
-        if (!temporary) {
-            setVisible(false); 
-        } else {
-            setVisible(true);
-        }
-    }    
+void Goodies::setVisibleToIceman(bool s) {
+    state = s;
+    setVisible(s);
+}
 
-    virtual GoldNugget::~GoldNugget();
+    // GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+    // : Goodies(IID_GOLD, startX, startY, 2)
+    // {
+    //     m_temporary = temporary;
+    //     m_lifetime = lifetime;
+    //     if (!temporary) {
+    //         setVisible(false); 
+    //     } else {
+    //         setVisible(true);
+    //     }
+    // }    
 
-    void GoldNugget::doSomething() override
-    {
-        if (!isAlive()) {
-            return;
-        }
+    // virtual GoldNugget::~GoldNugget();
 
-        if (m_temporary) {
-            if (--m_lifetime <= 0) {
-                setAlive(false);
-                return;
-            }
+    // void GoldNugget::doSomething() override
+    // {
+    //     if (!isAlive()) {
+    //         return;
+    //     }
 
-            // Add logic to detect if Proteste picks up the gold
-            // If so, give score, setAlive(false), play sound
-        } else {
-            // Add logic to check if Iceman is close enough
-            // if so give gold to player, increase score, setAlive(false), play sound
-        }
-    }
+    //     if (m_temporary) {
+    //         if (--m_lifetime <= 0) {
+    //             setAlive(false);
+    //             return;
+    //         }
+
+    //         // Add logic to detect if Proteste picks up the gold
+    //         // If so, give score, setAlive(false), play sound
+    //     } else {
+    //         // Add logic to check if Iceman is close enough
+    //         // if so give gold to player, increase score, setAlive(false), play sound
+    //     }
+    // }

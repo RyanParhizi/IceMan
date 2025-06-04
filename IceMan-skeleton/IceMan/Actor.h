@@ -55,29 +55,25 @@ private:
 };
 
 class Goodies : public Actor {
-
 public:
-    Goodies(int imageID, int startX, int startY, unsigned int depth = 2) //pass reference to the iceman, this way we can keep track of location and increment inventory
-    : Actor(imageID, startX, startY, right, 1.0, depth)
-    {
-        state = true;
-    }
 
+    Goodies(int imageID, int startX, int startY, Iceman& playerRef, unsigned int depth = 2);
     virtual ~Goodies();
-    virtual void doSomething() override = 0; // in goodies do the collision check with the location of the goodie object and the location of iceman, if collision, setvisble to false and setisalive to false, 
+    virtual void doSomething() override = 0;
     bool isVisibleToIceman();
     void setVisibleToIceman(bool s);
 
-private:
+protected: //this was the derived classes can access these elements
     bool state;
+    Iceman& player;
 };
 
-class GoldNugget : public Goodies {
-public:
-    GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
-    : Goodies(IID_GOLD, startX, startY, 2);
+// class GoldNugget : public Goodies {
+// public:
+//     GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+//     : Goodies(IID_GOLD, startX, startY, 2);
 
-    virtual ~GoldNugget();
-    void doSomething() override;
+//     virtual ~GoldNugget();
+//     void doSomething() override;
 
 #endif // ACTOR_H_
