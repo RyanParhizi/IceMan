@@ -27,7 +27,6 @@ int StudentWorld::move() {
 			actor->doSomething();
 		}
 	}
-	//iterate over the actor vector (contains boulders, squirts, gun, goodies, etc) and ruch each of the dosomethings. each actor has access to the iceman
 	deleteIceAroundPlayer();
 	return GWSTATUS_CONTINUE_GAME;
 }

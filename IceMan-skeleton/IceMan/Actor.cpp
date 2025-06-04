@@ -111,36 +111,18 @@ void Goodies::setVisibleToIceman(bool s) {
     setVisible(s);
 }
 
-    // GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
-    // : Goodies(IID_GOLD, startX, startY, 2)
-    // {
-    //     m_temporary = temporary;
-    //     m_lifetime = lifetime;
-    //     if (!temporary) {
-    //         setVisible(false); 
-    //     } else {
-    //         setVisible(true);
-    //     }
-    // }    
+    GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+    : Goodies(IID_GOLD, startX, startY, 2)
+    {
+        m_temporary = temporary;
+        m_lifetime = lifetime;
+        if (!temporary) {
+            setVisible(false); 
+        } else {
+            setVisible(true);
+        }
+    }    
 
-    // virtual GoldNugget::~GoldNugget();
+    virtual GoldNugget::~GoldNugget();
 
-    // void GoldNugget::doSomething() override
-    // {
-    //     if (!isAlive()) {
-    //         return;
-    //     }
-
-    //     if (m_temporary) {
-    //         if (--m_lifetime <= 0) {
-    //             setAlive(false);
-    //             return;
-    //         }
-
-    //         // Add logic to detect if Proteste picks up the gold
-    //         // If so, give score, setAlive(false), play sound
-    //     } else {
-    //         // Add logic to check if Iceman is close enough
-    //         // if so give gold to player, increase score, setAlive(false), play sound
-    //     }
-    // }
+    void GoldNugget::doSomething() override {}

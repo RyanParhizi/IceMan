@@ -63,17 +63,18 @@ public:
     bool isVisibleToIceman();
     void setVisibleToIceman(bool s);
 
-protected: //this was the derived classes can access these elements
+protected: //this way the derived classes can access these elements
     bool state;
     Iceman& player;
 };
 
-// class GoldNugget : public Goodies {
-// public:
-//     GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
-//     : Goodies(IID_GOLD, startX, startY, 2);
+class GoldNugget : public Goodies {
+public:
+    GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+    : Goodies(IID_GOLD, startX, startY, 2);
 
-//     virtual ~GoldNugget();
-//     void doSomething() override;
+    virtual ~GoldNugget();
+    void doSomething() override;
+}
 
 #endif // ACTOR_H_
