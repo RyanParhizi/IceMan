@@ -94,3 +94,35 @@ void Iceman::doSomething()  {
         break;
     }
 }
+
+Goodies::Goodies(int imageID, int startX, int startY, Iceman& playerRef, unsigned int depth)
+    : Actor(imageID, startX, startY, right, 1.0, depth), player(playerRef) {
+    state = true;
+}
+
+Goodies::~Goodies() {}
+
+bool Goodies::ispermanent() const {
+    return state;
+}
+
+void Goodies::setVisibleToIceman(bool s) {
+    state = s;
+    setVisible(s);
+}
+
+    GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+    : Goodies(IID_GOLD, startX, startY, 2)
+    {
+        m_temporary = temporary;
+        m_lifetime = lifetime;
+        if (!temporary) {
+            setVisible(false); 
+        } else {
+            setVisible(true);
+        }
+    }    
+
+    virtual GoldNugget::~GoldNugget();
+
+    void GoldNugget::doSomething() override {}

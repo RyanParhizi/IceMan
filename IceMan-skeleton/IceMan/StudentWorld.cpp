@@ -25,6 +25,11 @@ int StudentWorld::move() {
 	if (!getKey(keyStorage)) {
 		keyStorage = 0;
 	}
+	for (auto actor : levelActors) {
+		if (actor->isAlive()) {
+			actor->doSomething();
+		}
+	}
 	player->doSomething();
 	deleteIceAroundActor(player);
 	return GWSTATUS_CONTINUE_GAME;

@@ -54,4 +54,27 @@ private:
 
 };
 
+class Goodies : public Actor {
+public:
+
+    Goodies(int imageID, int startX, int startY, Iceman& playerRef, unsigned int depth = 2);
+    virtual ~Goodies();
+    virtual void doSomething() override = 0;
+    bool isVisibleToIceman();
+    void setVisibleToIceman(bool s);
+
+protected: //this way the derived classes can access these elements
+    bool state;
+    Iceman& player;
+};
+
+class GoldNugget : public Goodies {
+public:
+    GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+    : Goodies(IID_GOLD, startX, startY, 2);
+
+    virtual ~GoldNugget();
+    void doSomething() override;
+}
+
 #endif // ACTOR_H_
