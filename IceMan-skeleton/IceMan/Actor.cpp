@@ -111,18 +111,9 @@ void Goodies::setVisibleToIceman(bool s) {
     setVisible(s);
 }
 
-    GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
-    : Goodies(IID_GOLD, startX, startY, 2)
-    {
-        m_temporary = temporary;
-        m_lifetime = lifetime;
-        if (!temporary) {
-            setVisible(false); 
-        } else {
-            setVisible(true);
-        }
-    }    
+//GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+//: Goodies(IID_GOLD, startX, startY, 2) {}
 
-    virtual GoldNugget::~GoldNugget();
+GoldNugget::~GoldNugget() {}
 
-    void GoldNugget::doSomething() override {}
+void GoldNugget::doSomething() {}
