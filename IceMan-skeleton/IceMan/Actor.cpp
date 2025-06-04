@@ -17,12 +17,16 @@ bool Actor::isAlive(){
     return alive; 
 }
 
+/*----------------------------------Ice---------------------------------------*/
+
 Ice::Ice(int startX, int startY)
     : Actor(IID_ICE, startX, startY, right, 0.25, 3) {}
 
 Ice::~Ice() {}
 
 void Ice::doSomething() {}
+
+/*----------------------------------Person------------------------------------*/
 
 Person::Person(int imageID, int startX, int startY, Direction dir, double size, unsigned int depth )
     : Actor(imageID, startX, startY, dir, size, depth) {}
@@ -65,6 +69,8 @@ int Person::coordClamp(int&& coord) {
     return coord;
 }
 
+/*----------------------------------Iceman-------------------------------------*/
+
 Iceman::Iceman(const int& keyRef)
     : Person(IID_PLAYER, 30, 60, right, 1.0, 0), key(keyRef) {
 
@@ -95,25 +101,47 @@ void Iceman::doSomething()  {
     }
 }
 
+/*----------------------------------Goodies------------------------------------*/
+
 Goodies::Goodies(int imageID, int startX, int startY, Iceman& playerRef, unsigned int depth)
     : Actor(imageID, startX, startY, right, 1.0, depth), player(playerRef) {
-    state = true;
+    permeance = true;
 }
 
 Goodies::~Goodies() {}
 
 bool Goodies::ispermanent() const {
-    return state;
+    return permeance;
 }
 
 void Goodies::setVisibleToIceman(bool s) {
-    state = s;
+    permeance = s;
     setVisible(s);
 }
 
-//GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100)
+/*----------------------------------GoldNugget------------------------------------*/
+
+//GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100, bool permeance = true)
 //: Goodies(IID_GOLD, startX, startY, 2) {}
 
 GoldNugget::~GoldNugget() {}
 
 void GoldNugget::doSomething() {}
+
+/*
+
+--waterPuddle--
+
+*/
+
+/*
+
+--oilBarrel--
+
+*/
+
+/*
+
+--sonarKit--
+
+*/

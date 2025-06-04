@@ -64,15 +64,29 @@ public:
     void setVisibleToIceman(bool s);
 
 protected: //this way the derived classes can access these elements
-    bool state;
+    bool permeance; //this determines if the object can vanish if not collected after some elapsed time
     Iceman& player;
+    //add a function here to determined time elapsed for items to vanish, sonar kit and water puddle. 
+    //check expire function, access the permeance variable, check the current time against its expiration data, change isalive state 
 };
 
 class GoldNugget : public Goodies {
 public:
-    GoldNugget(int startX, int startY, bool temporary, int lifetime = 100);;
+    GoldNuggetGoldNugget(int startX, int startY, bool temporary, int lifetime = 100, bool permeance = true);
     virtual ~GoldNugget();
     void doSomething() override;
-};;
+};
+
+class waterPuddle : public Goodies {
+
+};
+
+class oilBarrel : public goodies {
+
+};
+
+class sonarKit : public goodies {
+
+};
 
 #endif // ACTOR_H_
