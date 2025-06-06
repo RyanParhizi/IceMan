@@ -69,6 +69,8 @@ public:
     // makes to approach the IceMan.
     GraphObject::Direction determineFirstMoveToIceMan(int x, int y);
 
+    std::array<std::array<Ice*, 64>, 64>& getIceGrid() { return iceGrid; }
+
 private:
     void iceGridAction(bool option);
     void generateLevelActors();

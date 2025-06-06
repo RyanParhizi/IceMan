@@ -185,11 +185,42 @@ Boulder::Boulder(StudentWorld* world, int startX, int startY)
 
 }
 void Boulder::move() {
-
+    if (!isAlive()) {
+        return;
+    }
+    switch (m_state) {
+    case State::stable:
+        if (!iceBelow()) {
+            m_state = State::waiting;
+        }
+        break;
+    case State::waiting:
+        ticksToWait--;
+        if (ticksToWait <= 0) {
+            m_state = State::falling;
+            getWorld()->playSound(SOUND_FALLING_ROCK);
+        }
+        break;
+    case State::falling:
+        if (!moveToIfPossible(getX(), getY() - 1) || iceBelow()) {
+            setDead();
+        }
+        getWorld()->annoyAllNearbyActors(this, 100, 3);
+        break;
+    }
 }
 bool Boulder::canActorsPassThroughMe() const {
     return false;
-}//whyIsThisHere
+}
+
+bool Boulder::iceBelow() {
+    for (int i = 0; i < 4; i++) {
+        if (getWorld()->getIceGrid()[getX() + i][std::max(getY() - 1, 0)] != nullptr) {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 // Squirt _________________________________________________________________________________________

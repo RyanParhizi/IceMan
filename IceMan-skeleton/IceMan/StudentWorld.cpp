@@ -23,12 +23,13 @@ int StudentWorld::init() {
 	return GWSTATUS_CONTINUE_GAME;
 }
 int StudentWorld::move() {
-	for (Actor* actor : levelActors) {
-		if (actor->isAlive()) {
-			actor->move();
-		}
-	}
 	player->move();
+
+	std::for_each(levelActors.begin(), levelActors.end(), 
+		[](Actor* actor) { actor->move(); });
+	levelActors.erase(std::remove_if(levelActors.begin(), levelActors.end(),
+		[](Actor* actor) { if (!actor->isAlive()) { delete actor; return true; } return false;}), levelActors.end());
+
 	clearIce(player->getX(), player->getY());
 	return GWSTATUS_CONTINUE_GAME;
 }
@@ -62,7 +63,7 @@ void StudentWorld::clearIce(int x, int y) {
 bool StudentWorld::canActorMoveTo(Actor* a, int x, int y) const {
 	if (0 <= x && x <= 60 && 0 <= y && y <= 60) {
 		for (Actor* actor : levelActors) {
-			if (!actor->canActorsPassThroughMe()) {
+			if (!actor->canActorsPassThroughMe() && actor != a) {
 				if (x - 4 < actor->getX() && actor->getX() < x + 4 &&
 					y - 4 < actor->getY() && actor->getY() < y + 4) {
 					return false;
@@ -201,8 +202,6 @@ std::pair<int, int> StudentWorld::findNewLocation(int x1, int y1, int x2, int y2
 	std::cerr << "findNewLocation() has failed.";
 	return std::pair<int, int>(-4, -4);
 }
-
-
 
 
 

@@ -45,7 +45,7 @@ public:
     // return false without moving.
     bool moveToIfPossible(int x, int y);
 
-private:
+protected:
     StudentWorld* world;
     bool visible;
     bool m_isAlive = true;
@@ -154,9 +154,15 @@ public:
 class Boulder : public Actor
 {
 public:
+    enum class State { stable, waiting, falling };
     Boulder(StudentWorld* world, int startX, int startY);
     virtual void move();
-    virtual bool canActorsPassThroughMe() const; //whyIsThisHere
+    virtual bool canActorsPassThroughMe() const;
+private:
+    bool iceBelow();
+
+    State m_state = State::stable;
+    int ticksToWait = 30;
 };
 
 class Squirt : public Actor
