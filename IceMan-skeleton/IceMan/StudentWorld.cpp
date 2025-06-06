@@ -60,12 +60,16 @@ void StudentWorld::clearIce(int x, int y) {
 
 // Can actor move to x,y?
 bool StudentWorld::canActorMoveTo(Actor* a, int x, int y) const {
-	if (0 < x && x < 60 && 0 < y && y < 60) {
+	if (0 <= x && x <= 60 && 0 <= y && y <= 60) {
 		for (Actor* actor : levelActors) {
 			if (!actor->canActorsPassThroughMe()) {
-				
+				if (x - 4 < actor->getX() && actor->getX() < x + 4 &&
+					y - 4 < actor->getY() && actor->getY() < y + 4) {
+					return false;
+				}
 			}
 		}
+		return true;
 	}
 	return false;
 }
