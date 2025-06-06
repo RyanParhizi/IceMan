@@ -70,10 +70,13 @@ public:
 
     virtual bool annoy(unsigned int amount); //whyIsThisHere;
     virtual bool canPickThingsUp() const; //whyIsThisHere;
+
+protected:
+    void Agent::processMovementInput(Direction inDir);
+
 private:
     int hitPoints; //whatShouldTheDefaultBe
 
-    void Agent::processMovementInput(Direction inDir);
 };
 
 class IceMan : public Agent

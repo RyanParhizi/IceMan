@@ -76,7 +76,25 @@ IceMan::IceMan(StudentWorld* world, int startX, int startY)
 
 }
 void IceMan::move() {
+    if (!isAlive()) { return; }
 
+    int key;
+    getWorld()->getKey(key);
+
+    switch (key) {
+    case KEY_PRESS_RIGHT:
+        processMovementInput(right);
+        break;
+    case KEY_PRESS_LEFT:
+        processMovementInput(left);
+        break;
+    case KEY_PRESS_UP:
+        processMovementInput(up);
+        break;
+    case KEY_PRESS_DOWN:
+        processMovementInput(down);
+        break;
+    }
 }
 bool IceMan::annoy(unsigned int amount) {
     return false;
