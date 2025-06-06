@@ -63,11 +63,17 @@ public:
     bool ispermanent() const;
     void setVisibleToIceman(bool s);
 
-protected: //this way the derived classes can access these elements
+protected:
     bool permeance; //this determines if the object can vanish if not collected after some elapsed time
     Iceman& player;
+    // Time management functions
+    void startLifetimeTimer();
+    bool hasLifetimeExpired() const;
     //add a function here to determined time elapsed for items to vanish, sonar kit and water puddle. 
     //check expire function, access the permeance variable, check the current time against its expiration data, change isalive state 
+private:
+    std::chrono::time_point<std::chrono::steady_clock> startTime;
+    int lifetime; //how long the object should last once timer is started 
 };
 
 class GoldNugget : public Goodies {

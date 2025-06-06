@@ -1,5 +1,6 @@
 #include "Actor.h"
 #include "StudentWorld.h"
+#include <chrono> 
 
 Actor::Actor(int imageID, int startX, int startY, Direction dir, double size, unsigned int depth)
     : GraphObject(imageID, startX, startY, dir, size, depth) {
@@ -117,6 +118,22 @@ bool Goodies::ispermanent() const {
 void Goodies::setVisibleToIceman(bool s) {
     permeance = s;
     setVisible(s);
+}
+
+void Goodies::startLifetimeTimer() {
+    startTime = std::chrono::steady_clock::now();
+}
+
+bool Goodies::hasLifetimeExpired() const 
+{
+    if (ispermanent()) {
+        return false; // Permanent objects don't expire
+    }
+    
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+    
+    return elapsed >= lifetime;
 }
 
 /*----------------------------------GoldNugget------------------------------------*/
