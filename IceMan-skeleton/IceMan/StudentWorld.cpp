@@ -51,34 +51,66 @@ void StudentWorld::addActor(Actor* a) {
 
 // Clear a 4x4 region of Ice.
 void StudentWorld::clearIce(int x, int y) {
+	bool icePresent = false;
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
+			if (iceGrid[x + i][y + j]){
+				icePresent = true;
+			}
 			delete iceGrid[x + i][y + j];
 			iceGrid[x + i][y + j] = nullptr;
 		}
+	}
+	if (icePresent) {
+		playSound(SOUND_DIG);
 	}
 }
 
 // Can actor move to x,y?
 bool StudentWorld::canActorMoveTo(Actor* a, int x, int y) const {
-	if (0 <= x && x <= 60 && 0 <= y && y <= 60) {
-		for (Actor* actor : levelActors) {
-			if (!actor->canActorsPassThroughMe() && actor != a) {
-				if (x - 4 < actor->getX() && actor->getX() < x + 4 &&
-					y - 4 < actor->getY() && actor->getY() < y + 4) {
+	if (x < 0 || 60 < x || y < 0 || 60 < y) {
+		return false;
+	}
+	for (Actor* actor : levelActors) {
+		if (!actor->canActorsPassThroughMe() && actor != a) {
+			if (x - 4 < actor->getX() && actor->getX() < x + 4 &&
+				y - 4 < actor->getY() && actor->getY() < y + 4) {
+				return false;
+			}
+		}
+	}
+	if (a != player) {
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				if (iceGrid[x + i][y + j]) {
 					return false;
 				}
 			}
 		}
-		return true;
 	}
-	return false;
+	return true;
 }
 
 // Annoy all other actors within radius of annoyer, returning the
 // number of actors annoyed.
 int StudentWorld::annoyAllNearbyActors(Actor* annoyer, int points, int radius) {
-	return 0;
+	int annoiedActorCount = 0;
+	for (Actor* actor : levelActors) {
+		if (actor == annoyer) {
+			continue;
+		}
+		if (std::hypot(annoyer->getX() - actor->getX(), annoyer->getY() - actor->getY()) <= radius) {
+			actor->annoy(points);
+			annoiedActorCount++;
+		}
+	}
+	if(annoyer->canHurtIceMan()) {
+		if (std::hypot(annoyer->getX() - player->getX(), annoyer->getY() - player->getY()) <= radius) {
+			player->annoy(points);
+			annoiedActorCount++;
+		}
+	}
+	return annoiedActorCount;
 }
 
 // Reveal all objects within radius of x,y.

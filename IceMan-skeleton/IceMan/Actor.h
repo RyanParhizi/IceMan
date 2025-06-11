@@ -27,33 +27,32 @@ public:
     StudentWorld* getWorld() const { return world; }
 
     // Can other actors pass through this actor?
-    virtual bool canActorsPassThroughMe() const { return m_canActorsPassThroughMe; }
+    virtual bool canActorsPassThroughMe() const { return true; }
 
     // Can this actor dig through Ice?
-    virtual bool canDigThroughIce() const { return m_canDigThroughIce; }
+    virtual bool canDigThroughIce() const { return false; }
 
     // Can this actor pick items up?
-    virtual bool canPickThingsUp() const { return m_canPickThingsUp; }
+    virtual bool canPickThingsUp() const { return false; }
 
     // Does this actor hunt the IceMan?
-    virtual bool huntsIceMan() const { return m_huntsIceMan; }
+    virtual bool huntsIceMan() const { return false; }
 
     // Can this actor need to be picked up to finish the level?
-    virtual bool needsToBePickedUpToFinishLevel() const { return m_needsToBePickedUpToFinishLevel; }
+    virtual bool needsToBePickedUpToFinishLevel() const { return false; }
 
     // Move this actor to x,y if possible, and return true; otherwise,
     // return false without moving.
     bool moveToIfPossible(int x, int y);
 
+    virtual bool canHurtIceMan() const { return true; }
+
 protected:
     StudentWorld* world;
     bool visible;
     bool m_isAlive = true;
-    bool m_canActorsPassThroughMe = true;
-    bool m_canDigThroughIce = false;
-    bool m_canPickThingsUp = false;
-    bool m_huntsIceMan = false;
-    bool m_needsToBePickedUpToFinishLevel = false;
+
+    bool processMovementInput(Direction inDir);
 };
 
 class Agent : public Actor
@@ -69,12 +68,9 @@ public:
     unsigned int getHitPoints() const { return hitPoints; }
 
     virtual bool annoy(unsigned int amount); //whyIsThisHere;
-    virtual bool canPickThingsUp() const; //whyIsThisHere;
+    virtual bool canPickThingsUp() const { return true; }
 
 protected:
-    void Agent::processMovementInput(Direction inDir);
-
-private:
     int hitPoints; //whatShouldTheDefaultBe
 
 };
@@ -86,7 +82,7 @@ public:
     virtual void move();
     virtual bool annoy(unsigned int amount);
     virtual void addGold();
-    virtual bool canDigThroughIce() const; //whyIsThisHere;
+    virtual bool canDigThroughIce() { return true; }
 
     // Pick up a sonar kit.
     void addSonar();
@@ -105,7 +101,7 @@ public:
 private:
     int gold; //whatShouldTheDefaultBe
     int sonar; //whatShouldTheDefaultBe
-    int water; //whatShouldTheDefaultBe
+    int water = 5; //whatShouldTheDefaultBe
 };
 
 class Protester : public Agent
@@ -116,7 +112,7 @@ public:
     virtual void move();
     virtual bool annoy(unsigned int amount);
     virtual void addGold();
-    virtual bool huntsIceMan() const; // whyIsThisHere
+    virtual bool huntsIceMan() const { return true; }
 
     // Set state to having given up protest
     void setMustLeaveOilField() { mustLeaveOilField = true; }
@@ -159,8 +155,6 @@ public:
     virtual void move();
     virtual bool canActorsPassThroughMe() const;
 private:
-    bool iceBelow();
-
     State m_state = State::stable;
     int ticksToWait = 30;
 };
@@ -170,6 +164,11 @@ class Squirt : public Actor
 public:
     Squirt(StudentWorld* world, int startX, int startY, Direction startDir);
     virtual void move();
+
+    virtual bool canHurtIceMan() const { return false; }
+
+private:
+    int range = 4;
 };
 
 class ActivatingObject : public Actor
