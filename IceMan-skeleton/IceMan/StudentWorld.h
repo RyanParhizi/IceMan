@@ -75,11 +75,15 @@ private:
     void iceGridAction(bool option);
     void generateLevelActors();
     std::pair<int, int> findNewLocation(int x1, int y1, int x2, int y2);
+
+    void updateDisplayText();
    
     IceMan* player = nullptr;
     std::array<std::array<Ice*, 64>, 64> iceGrid{};
     std::vector<Actor*> levelActors;
     int currentLevel = 0;
+    int livesLeft = 3;
+    int currentScore = 0;
 };
 
 #endif // STUDENTWORLD_H_

@@ -59,13 +59,13 @@ bool Actor::processMovementInput(Direction inDir) {
 
 Agent::Agent(StudentWorld* world, int startX, int startY, Direction startDir,
     int imageID, unsigned int hitPoints)
-    : Actor(world, startX, startY, startDir, true, imageID, 1, 0), hitPoints(hitPoints) {
-
-}
+    : Actor(world, startX, startY, startDir, true, imageID, 1, 0),
+    hitPoints(hitPoints), startingHitPoints(hitPoints) {}
 
 bool Agent::annoy(unsigned int amount) {
     hitPoints -= amount;
     if (hitPoints <= 0) {
+        hitPoints = 0;
         setDead();
     }
     return true;
