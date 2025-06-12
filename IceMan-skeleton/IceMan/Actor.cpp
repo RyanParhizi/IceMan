@@ -28,23 +28,7 @@ bool Actor::moveToIfPossible(int x, int y) {
     }
 }
 
-
-// Agent __________________________________________________________________________________________
-
-Agent::Agent(StudentWorld* world, int startX, int startY, Direction startDir,
-    int imageID, unsigned int hitPoints)
-    : Actor(world, startX, startY, startDir, true, imageID, 1, 0), hitPoints(hitPoints) {
-
-}
-
-bool Agent::annoy(unsigned int amount) {
-    return false;
-} //whyIsThisHere;
-bool Agent::canPickThingsUp() const {
-    return false;
-} //whyIsThisHere;
-
-void Agent::processMovementInput(Direction inDir) {
+bool Actor::processMovementInput(Direction inDir) {
     if (getDirection() != inDir) {
         setDirection(inDir);
     }
@@ -65,9 +49,29 @@ void Agent::processMovementInput(Direction inDir) {
             dy = -1;
             break;
         }
-        moveToIfPossible(getX() + dx, getY() + dy);
+        return moveToIfPossible(getX() + dx, getY() + dy);
     }
+    return true;
 }
+
+
+// Agent __________________________________________________________________________________________
+
+Agent::Agent(StudentWorld* world, int startX, int startY, Direction startDir,
+    int imageID, unsigned int hitPoints)
+    : Actor(world, startX, startY, startDir, true, imageID, 1, 0),
+    hitPoints(hitPoints), startingHitPoints(hitPoints) {}
+
+bool Agent::annoy(unsigned int amount) {
+    hitPoints -= amount;
+    if (hitPoints <= 0) {
+        hitPoints = 0;
+        setDead();
+    }
+    return true;
+}
+    
+
 
 // Iceman _________________________________________________________________________________________
 
@@ -94,17 +98,20 @@ void IceMan::move() {
     case KEY_PRESS_DOWN:
         processMovementInput(down);
         break;
+    case KEY_PRESS_SPACE:
+        if(this->water > 0) {
+            water--;
+            getWorld()->addActor(new Squirt(getWorld(), getX(), getY(), getDirection()));
+            break;
+        }
     }
 }
 bool IceMan::annoy(unsigned int amount) {
-    return false;
+    return Agent::annoy(amount);
 }
 void IceMan::addGold() {
 
 }
-bool IceMan::canDigThroughIce() const {
-    return false;
-} //whyIsThisHere;
 
 
 // Pick up a sonar kit.
@@ -134,9 +141,6 @@ bool Protester::annoy(unsigned int amount) {
 void Protester::addGold() {
 
 }
-bool Protester::huntsIceMan() const {
-    return false;
-} // whyIsThisHere
 
 
 // RegularProtester _______________________________________________________________________________
@@ -185,21 +189,56 @@ Boulder::Boulder(StudentWorld* world, int startX, int startY)
 
 }
 void Boulder::move() {
-
+    if (!isAlive()) {
+        return;
+    }
+    switch (m_state) {
+    case State::stable:
+        if (getWorld()->canActorMoveTo(this, getX(), getY()-1)) {
+            m_state = State::waiting;
+        }
+        break;
+    case State::waiting:
+        ticksToWait--;
+        if (ticksToWait <= 0) {
+            m_state = State::falling;
+            getWorld()->playSound(SOUND_FALLING_ROCK);
+        }
+        break;
+    case State::falling:
+        if (!processMovementInput(getDirection())) {
+            setDead();
+        }
+        getWorld()->annoyAllNearbyActors(this, 100, 3);
+        break;
+    }
 }
+
 bool Boulder::canActorsPassThroughMe() const {
     return false;
-}//whyIsThisHere
+}
+
 
 
 // Squirt _________________________________________________________________________________________
 
 Squirt::Squirt(StudentWorld* world, int startX, int startY, Direction startDir)
     : Actor(world, startX, startY, startDir, true, IID_WATER_SPURT, 1, 1) {
-
+    getWorld()->playSound(SOUND_PLAYER_SQUIRT);
 }
 void Squirt::move() {
 
+    if (getWorld()->annoyAllNearbyActors(this, 2, 3) > 0) {
+        setDead();
+        return;
+    }
+    if (!processMovementInput(getDirection())) {
+        setDead();
+    }
+    if (range <= 0) {
+        setDead();
+    }
+    range--;
 }
 
 
