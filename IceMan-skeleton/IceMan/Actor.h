@@ -66,12 +66,14 @@ public:
 
     // How many hit points does this actor have left?
     unsigned int getHitPoints() const { return hitPoints; }
+    unsigned int getStartingHitPoints() const { return startingHitPoints; }
 
     virtual bool annoy(unsigned int amount); //whyIsThisHere;
     virtual bool canPickThingsUp() const { return true; }
 
 protected:
-    int hitPoints; //whatShouldTheDefaultBe
+    int hitPoints;
+    int startingHitPoints;
 
 };
 
@@ -99,9 +101,9 @@ public:
     // Get amount of water
     unsigned int getWater() const { return water; }
 private:
-    int gold; //whatShouldTheDefaultBe
-    int sonar; //whatShouldTheDefaultBe
-    int water = 5; //whatShouldTheDefaultBe
+    int gold = 0;
+    int sonar = 1;
+    int water = 5;
 };
 
 class Protester : public Agent

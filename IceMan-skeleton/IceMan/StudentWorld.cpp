@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <random>
 #include <cmath>
+#include <sstream>
+#include <iomanip>
 
 GameWorld* createStudentWorld(std::string assetDir)
 {
@@ -31,6 +33,9 @@ int StudentWorld::move() {
 		[](Actor* actor) { if (!actor->isAlive()) { delete actor; return true; } return false;}), levelActors.end());
 
 	clearIce(player->getX(), player->getY());
+
+	updateDisplayText();
+
 	return GWSTATUS_CONTINUE_GAME;
 }
 void StudentWorld::cleanUp() {
@@ -235,8 +240,22 @@ std::pair<int, int> StudentWorld::findNewLocation(int x1, int y1, int x2, int y2
 	return std::pair<int, int>(-4, -4);
 }
 
+void StudentWorld::updateDisplayText()
+{
+	std::ostringstream displayText;
 
+	using namespace std;
+	displayText << "Lvl: " << right << setw(2) << currentLevel << "  "
+		<< "Lives: " << setw(1) << livesLeft << "  "
+		<< "Hlth: " << setw(3) << 100 * player->getHitPoints() / player->getStartingHitPoints() << "%  "
+		<< "Wtr: " << setw(2) << player->getWater() << "  "
+		<< "Gld: " << setw(2) << player->getGold() << "  "
+		<< "Oil Left: " << setw(2) << "XX"/*get oil left*/ << "  "
+		<< "Sonar: " << setw(2) << player->getSonar() << "  "
+		<< "Scr: " << setw(6) << setfill('0') << currentScore;
 
+	setGameStatText(displayText.str());
+}
 /*
 
 #include "StudentWorld.h"
