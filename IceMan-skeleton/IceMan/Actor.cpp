@@ -109,19 +109,20 @@ void IceMan::move() {
 bool IceMan::annoy(unsigned int amount) {
     return Agent::annoy(amount);
 }
-void IceMan::addGold() {
 
+void IceMan::addGold() {
+    gold++;
 }
 
 
 // Pick up a sonar kit.
 void IceMan::addSonar() {
-
+    sonar++;
 }
 
 // Pick up water.
 void IceMan::addWater() {
-
+    water += 5;  // Add 5 squirts as specified in requirements
 }
 
 
@@ -264,195 +265,149 @@ void ActivatingObject::setTicksToLive() {
 // OilBarrel ______________________________________________________________________________________
 
 OilBarrel::OilBarrel(StudentWorld* world, int startX, int startY)
-    :ActivatingObject(world, startX, startY, IID_BARREL, SOUND_FOUND_OIL,
-        true, false, false) {
-
+    : ActivatingObject(world, startX, startY, IID_BARREL, SOUND_FOUND_OIL,
+                     true,  // Can be activated by Iceman
+                     false, // Cannot be activated by protesters
+                     false) // Starts invisible
+{
+    setVisible(false); // Explicitly set invisible
 }
+
 void OilBarrel::move() {
+    if (!isAlive()) return;
 
+    if (!isVisible()) {
+        Actor* iceMan = getWorld()->findNearbyIceMan(this, 4.0);
+        if (iceMan != nullptr) {
+            setVisible(true);
+            return;
+        }
+    }
+    else {
+        Actor* iceMan = getWorld()->findNearbyIceMan(this, 3.0);
+        if (iceMan != nullptr) {
+            setDead();
+            getWorld()->playSound(SOUND_FOUND_OIL);
+            getWorld()->increaseScore(1000);
+            getWorld()->collectOil();  // Call the renamed method
+            return;
+        }
+    }
 }
-bool OilBarrel::needsToBePickedUpToFinishLevel() const {
-    return false;
-} //whyIsThisHere
-
 
 // GoldNugget _____________________________________________________________________________________
 
-GoldNugget::GoldNugget(StudentWorld* world, int startX, int startY, bool temporary)
-    :ActivatingObject(world, startX, startY, IID_GOLD, SOUND_GOT_GOODIE, true,
-    true, true), temporary(temporary) {
-
+GoldNugget::GoldNugget(StudentWorld* world, int startX, int startY,
+                      bool temporary, bool pickupByIceMan, bool visible)
+    : ActivatingObject(world, startX, startY, IID_GOLD,
+                      (pickupByIceMan ? SOUND_GOT_GOODIE : SOUND_PROTESTER_FOUND_GOLD),
+                      pickupByIceMan, !pickupByIceMan, visible),
+      m_temporary(temporary), m_pickupByIceMan(pickupByIceMan)
+{
+    setVisible(visible);
+    if (m_temporary) {
+        setTicksToLive(100); // Standard temporary lifetime
+    }
 }
+
 void GoldNugget::move() {
+    if (!isAlive()) return;
 
+    if (!isVisible()) {
+        // Make visible when Iceman is within 4 units
+        Actor* iceMan = getWorld()->findNearbyIceMan(this, 4);
+        if (iceMan != nullptr) {
+            setVisible(true);
+            return;
+        }
+    }
+    else {
+        if (m_pickupByIceMan) {
+            Actor* iceMan = getWorld()->findNearbyIceMan(this, 3);
+            if (iceMan != nullptr) {
+                setDead();
+                getWorld()->playSound(SOUND_GOT_GOODIE); // Hardcoded sound
+                getWorld()->increaseScore(10);
+                dynamic_cast<IceMan*>(iceMan)->addGold();
+                return;
+            }
+        }
+        else {
+            Actor* protester = getWorld()->findNearbyPickerUpper(this, 3);
+            if (protester != nullptr) {
+                setDead();
+                getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD); // Hardcoded sound
+                dynamic_cast<Protester*>(protester)->addGold();
+                return;
+            }
+        }
+    }
+
+    if (m_temporary) {
+        decreaseTicksToLive();
+        if (getTicksToLive() <= 0) {
+            setDead();
+        }
+    }
 }
-
 
 // SonarKit _______________________________________________________________________________________
 
-SonarKit::SonarKit(StudentWorld* world, int startX, int startY)
-    :ActivatingObject(world, startX, startY, IID_SONAR, SOUND_GOT_GOODIE,
-        true, false, true) {
-
+SonarKit::SonarKit(StudentWorld* world, int startX, int startY, int currentLevel)
+    : ActivatingObject(world, startX, startY, IID_SONAR, SOUND_GOT_GOODIE, true, false, true),
+      m_ticksLeft(std::max(100, 300 - 10 * currentLevel)) {
+    setVisible(true);
 }
+
 void SonarKit::move() {
+    if (!isAlive()) return;
 
+    // Check if Iceman is within 3.0 units
+    Actor* iceMan = getWorld()->findNearbyIceMan(this, 3);
+    if (iceMan != nullptr) {
+        setDead();
+        getWorld()->playSound(SOUND_GOT_GOODIE);
+        getWorld()->increaseScore(75);
+        dynamic_cast<IceMan*>(iceMan)->addSonar();
+        return;
+    }
+
+    // Decrease lifetime and check if it should expire
+    if (--m_ticksLeft <= 0) {
+        setDead();
+    }
 }
-
 
 // WaterPool ______________________________________________________________________________________
 
 WaterPool::WaterPool(StudentWorld* world, int startX, int startY)
-    :ActivatingObject(world, startX, startY, IID_WATER_POOL, SOUND_GOT_GOODIE,
-        true, false, true) {
-
+    : ActivatingObject(world, startX, startY, IID_WATER_POOL, SOUND_GOT_GOODIE,
+                     true, false, true)  // visible, pickup by IceMan only
+{
+    setVisible(true);
+    // Calculate lifetime using max(100, 300 - 10*current_level_number)
+    int ticks = std::max(100, 300 - 10 * world->getLevel());
+    setTicksToLive(ticks);
 }
-void WaterPool::move() {
 
+void WaterPool::move() 
+{
+    if (!isAlive()) return;
+
+    // Check if Iceman is within 3.0 units
+    Actor* iceMan = getWorld()->findNearbyIceMan(this, 3);
+    if (iceMan != nullptr) {
+        setDead();
+        getWorld()->playSound(SOUND_GOT_GOODIE);
+        getWorld()->increaseScore(100);
+        dynamic_cast<IceMan*>(iceMan)->addWater();
+        return;
+    }
+
+    // Decrease lifetime and check if expired
+    decreaseTicksToLive();
+    if (getTicksToLive() <= 0) {
+        setDead();
+    }
 }
 
-
-//Actor::Actor(int imageID, int startX, int startY, Direction dir, double size, unsigned int depth)
-//    : GraphObject(imageID, startX, startY, dir, size, depth) {
-//    setVisible(true);
-//}
-//
-//Actor::~Actor() {}
-//
-//void Actor::setAlive(bool alive_) {
-//    alive = alive_;
-//}
-//
-//
-//bool Actor::isAlive(){
-//    return alive; 
-//}
-
-/*----------------------------------Ice---------------------------------------*/
-
-//Ice::Ice(int startX, int startY)
-//    : Actor(IID_ICE, startX, startY, right, 0.25, 3) {}
-//
-//Ice::~Ice() {}
-//
-//void Ice::doSomething() {}
-
-/*----------------------------------Person------------------------------------*/
-
-//Person::Person(int imageID, int startX, int startY, Direction dir, double size, unsigned int depth )
-//    : Actor(imageID, startX, startY, dir, size, depth) {}
-//
-//Person::~Person() {}
-//
-//void Person::annoy(int damage) {
-//    hitPoints -= damage;
-//}
-//
-//void Person::processMovementInput(Direction inDir) {
-//    if (getDirection() != inDir) {
-//        setDirection(inDir);
-//    }
-//    else {
-//        int dx = 0;
-//        int dy = 0;
-//        switch (inDir) {
-//        case right:
-//            dx = 1;
-//            break;
-//        case left:
-//            dx = -1;
-//            break;
-//        case up:
-//            dy = 1;
-//            break;
-//        case down:
-//            dy = -1;
-//            break;
-//        }
-//        moveTo(coordClamp(getX() + dx), coordClamp(getY() + dy));
-//    }
-//    return;
-//}
-//
-//int Person::coordClamp(int&& coord) {
-//    if (coord < 0) { coord = 0; }
-//    if (coord > 60) { coord = 60; }
-//    return coord;
-//}
-
-/*----------------------------------Iceman-------------------------------------*/
-
-//Iceman::Iceman(const int& keyRef)
-//    : Person(IID_PLAYER, 30, 60, right, 1.0, 0), key(keyRef) {
-//
-//    hitPoints = 10; 
-//    squirtCount = 5;
-//    sonarCount = 1;
-//    goldCount = 0;
-//}
-//
-//Iceman::~Iceman() {}
-//
-//void Iceman::doSomething()  {
-//    if (!isAlive()) { return; }
-//
-//    switch(key) {
-//    case KEY_PRESS_RIGHT:
-//        processMovementInput(right);
-//        break;
-//    case KEY_PRESS_LEFT:
-//        processMovementInput(left);
-//        break;
-//    case KEY_PRESS_UP:
-//        processMovementInput(up);
-//        break;
-//    case KEY_PRESS_DOWN:
-//        processMovementInput(down);
-//        break;
-//    }
-//}
-
-/*----------------------------------Goodies------------------------------------*/
-
-//Goodies::Goodies(int imageID, int startX, int startY, Iceman& playerRef, unsigned int depth)
-//    : Actor(imageID, startX, startY, right, 1.0, depth), player(playerRef) {
-//    permeance = true;
-//}
-//
-//Goodies::~Goodies() {}
-//
-//bool Goodies::ispermanent() const {
-//    return permeance;
-//}
-//
-//void Goodies::setVisibleToIceman(bool s) {
-//    permeance = s;
-//    setVisible(s);
-//}
-
-/*----------------------------------GoldNugget------------------------------------*/
-
-//GoldNugget::GoldNugget(int startX, int startY, bool temporary, int lifetime = 100, bool permeance = true)
-//: Goodies(IID_GOLD, startX, startY, 2) {}
-
-//GoldNugget::~GoldNugget() {}
-//
-//void GoldNugget::doSomething() {}
-
-/*
-
---waterPuddle--
-
-*/
-
-/*
-
---oilBarrel--
-
-*/
-
-/*
-
---sonarKit--
-
-*/
