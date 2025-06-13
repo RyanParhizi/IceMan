@@ -290,10 +290,6 @@ OilBarrel::OilBarrel(StudentWorld* world, int startX, int startY)
         true, false, false) {
     getWorld()->oilBarrelCreated();
 }
-OilBarrel::~OilBarrel()
-{
-    getWorld()->oilBarrelDestroied();
-}
 
 void OilBarrel::move() {
     if (!isAlive()) return;

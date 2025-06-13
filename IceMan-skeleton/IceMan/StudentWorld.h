@@ -77,8 +77,7 @@ public:
 
     std::array<std::array<Ice*, 64>, 64>& getIceGrid() { return iceGrid; }
 
-    void oilBarrelCreated() { oilLeft++; }
-    void oilBarrelDestroied() { oilLeft--; }
+    void oilBarrelCreated() { m_oilBarrelsLeft++; }
 
 private:
     void iceGridAction(bool option);
@@ -104,7 +103,7 @@ private:
     int currentLevel = 0;
     int livesLeft = 3;
     int currentScore = 0;
-    int oilLeft = 0;
+    int m_oilBarrelsLeft = 0;
 
     int protesterSpawnTimer = 0;
     int currentProtesterCount = 0;

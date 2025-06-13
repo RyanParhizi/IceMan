@@ -201,7 +201,6 @@ private:
 class OilBarrel : public ActivatingObject {
 public:
     OilBarrel(StudentWorld* world, int startX, int startY);
-    ~OilBarrel();
     virtual void move();
     virtual bool needsToBePickedUpToFinishLevel() const { return true; }
 };

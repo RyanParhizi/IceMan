@@ -42,7 +42,7 @@ int StudentWorld::move() {
 
 	updateDisplayText();
 
-	if (oilLeft <= 0) { // Win Condition
+	if (m_oilBarrelsLeft <= 0) { // Win Condition
 		currentLevel++;
 		playSound(SOUND_FINISHED_LEVEL);
 		return GWSTATUS_FINISHED_LEVEL;
@@ -312,7 +312,7 @@ void StudentWorld::createRegularProtestor() {
 }
 
 void StudentWorld::createSonarKit() {
-	addActor(new SonarKit(this, 0, 60));
+	addActor(new SonarKit(this, 0, 60, currentLevel));
 }
 
 void StudentWorld::createWaterPool() {
@@ -357,7 +357,7 @@ void StudentWorld::updateDisplayText() {
 		<< "Hlth: " << setw(3) << 100 * player->getHitPoints() / player->getStartingHitPoints() << "%  "
 		<< "Wtr: " << setw(2) << player->getWater() << "  "
 		<< "Gld: " << setw(2) << player->getGold() << "  "
-		<< "Oil Left: " << setw(2) << oilLeft << "  "
+		<< "Oil Left: " << setw(2) << m_oilBarrelsLeft << "  "
 		<< "Sonar: " << setw(2) << player->getSonar() << "  "
 		<< "Scr: " << setw(6) << setfill('0') << currentScore;
 
