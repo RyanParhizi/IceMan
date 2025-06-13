@@ -100,8 +100,7 @@ void IceMan::move() {
         break;
     case KEY_PRESS_SPACE:
         if(this->water > 0) {
-            water--;
-            getWorld()->addActor(new Squirt(getWorld(), getX(), getY(), getDirection()));
+            sprayWater();
             break;
         }
     }
@@ -122,6 +121,28 @@ void IceMan::addSonar() {
 // Pick up water.
 void IceMan::addWater() {
 
+}
+
+void IceMan::sprayWater() // Spawn position looks odd compared to demo.
+{
+    water--;
+    int dx = 0; // This is copied and modifyed from the processMovementInput() function. Consider making this a function itself.
+    int dy = 0;
+    switch (getDirection()) {
+    case right:
+        dx = 4;
+        break;
+    case left:
+        dx = -4;
+        break;
+    case up:
+        dy = 4;
+        break;
+    case down:
+        dy = -4;
+        break;
+    }
+    getWorld()->addActor(new Squirt(getWorld(), getX() + dx, getY() + dy, getDirection()));
 }
 
 
@@ -266,7 +287,11 @@ void ActivatingObject::setTicksToLive() {
 OilBarrel::OilBarrel(StudentWorld* world, int startX, int startY)
     :ActivatingObject(world, startX, startY, IID_BARREL, SOUND_FOUND_OIL,
         true, false, false) {
-
+    getWorld()->oilBarrelCreated();
+}
+OilBarrel::~OilBarrel()
+{
+    getWorld()->oilBarrelDestroied();
 }
 void OilBarrel::move() {
 

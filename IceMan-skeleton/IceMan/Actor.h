@@ -104,6 +104,8 @@ private:
     int gold = 0;
     int sonar = 1;
     int water = 5;
+
+    void sprayWater();
 };
 
 class Protester : public Agent
@@ -195,6 +197,7 @@ class OilBarrel : public ActivatingObject
 {
 public:
     OilBarrel(StudentWorld* world, int startX, int startY);
+    ~OilBarrel();
     virtual void move();
     virtual bool needsToBePickedUpToFinishLevel() const; //whyIsThisHere
 };
