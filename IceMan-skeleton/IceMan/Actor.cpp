@@ -121,7 +121,7 @@ void IceMan::addSonar() {
 
 // Pick up water.
 void IceMan::addWater() {
-    water += 5;  // Add 5 squirts as specified in requirements
+    water = 5;  // Add 5 squirts as specified in requirements
 }
 
 void IceMan::sprayWater() // Spawn position looks odd compared to demo.
@@ -247,15 +247,24 @@ bool Boulder::canActorsPassThroughMe() const {
 Squirt::Squirt(StudentWorld* world, int startX, int startY, Direction startDir)
     : Actor(world, startX, startY, startDir, true, IID_WATER_SPURT, 1, 1) {
     getWorld()->playSound(SOUND_PLAYER_SQUIRT);
+    if (!getWorld()->allIceAtCoords(getX(), getY(), false)) {
+        setDead();
+    }
 }
 void Squirt::move() {
 
-    if (getWorld()->annoyAllNearbyActors(this, 2, 3) > 0) {
-        setDead();
-        return;
+
+    if (spawnTickDelay) {
+        spawnTickDelay = false;
     }
-    if (!processMovementInput(getDirection())) {
-        setDead();
+    else {
+        if (getWorld()->annoyAllNearbyActors(this, 2, 3) > 0) {
+            setDead();
+            return;
+        }
+        if (!processMovementInput(getDirection())) {
+            setDead();
+        }
     }
     if (range <= 0) {
         setDead();
