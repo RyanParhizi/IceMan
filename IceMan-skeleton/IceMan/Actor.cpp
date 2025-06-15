@@ -103,6 +103,12 @@ void IceMan::move() {
             sprayWater();
             break;
         }
+    case KEY_PRESS_TAB:
+        if (this->gold > 0) {
+            getWorld()->addActor(new GoldNugget(getWorld(), getX(), getY(), true, false, true));
+            gold--;
+            break;
+        }
     }
 }
 bool IceMan::annoy(unsigned int amount) {
