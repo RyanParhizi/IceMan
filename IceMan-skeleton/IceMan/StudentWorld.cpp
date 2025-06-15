@@ -1,6 +1,9 @@
-#include "StudentWorld.h"
+#include <queue>
+#include <vector>
+#include <utility>
 #include <algorithm>
-#include <cmath>
+#include "StudentWorld.h"
+#include "Actor.h"
 #include <sstream>
 #include <iomanip>
 
@@ -482,4 +485,71 @@ void StudentWorld::updateDisplayText() {
 // Adds amount to current score
 void StudentWorld::addToScore(int amount) {
 	currentScore += amount;
+}
+
+void StudentWorld::getIceManLocation(int& x, int& y) const {
+    if (player) {
+        x = player->getX();
+        y = player->getY();
+    }
+}
+
+// Helper for BFS
+struct Node {
+    int x, y;
+    int steps;
+    GraphObject::Direction firstDir;
+};
+
+int StudentWorld::stepsToTarget(int startX, int startY, int endX, int endY) const {
+    const int WIDTH = 64, HEIGHT = 64; // adjust as needed
+    bool visited[WIDTH][HEIGHT] = {false};
+    std::queue<Node> q;
+    q.push({startX, startY, 0, GraphObject::none});
+    visited[startX][startY] = true;
+
+    while (!q.empty()) {
+        Node curr = q.front(); q.pop();
+        if (curr.x == endX && curr.y == endY)
+            return curr.steps;
+
+        const int dx[4] = { -1, 1, 0, 0 };
+        const int dy[4] = { 0, 0, 1, -1 };
+        for (int dir = 0; dir < 4; ++dir) {
+            int nx = curr.x + dx[dir], ny = curr.y + dy[dir];
+            if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
+            if (visited[nx][ny]) continue;
+            if (!canActorMoveTo(nullptr, nx, ny)) continue;
+            visited[nx][ny] = true;
+            q.push({nx, ny, curr.steps + 1, curr.steps == 0 ? static_cast<GraphObject::Direction>(dir) : curr.firstDir});
+        }
+    }
+    return -1;
+}
+
+GraphObject::Direction StudentWorld::determineFirstMoveToTarget(int startX, int startY, int endX, int endY) const {
+    const int WIDTH = 64, HEIGHT = 64; // adjust as needed
+    bool visited[WIDTH][HEIGHT] = {false};
+    std::queue<Node> q;
+    q.push({startX, startY, 0, GraphObject::none});
+    visited[startX][startY] = true;
+
+    while (!q.empty()) {
+        Node curr = q.front(); q.pop();
+        if (curr.x == endX && curr.y == endY)
+            return curr.firstDir;
+
+        const int dx[4] = { -1, 1, 0, 0 };
+        const int dy[4] = { 0, 0, 1, -1 };
+        for (int dir = 0; dir < 4; ++dir) {
+            int nx = curr.x + dx[dir], ny = curr.y + dy[dir];
+            if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
+            if (visited[nx][ny]) continue;
+            if (!canActorMoveTo(nullptr, nx, ny)) continue;
+            visited[nx][ny] = true;
+            GraphObject::Direction firstDir = (curr.steps == 0) ? static_cast<GraphObject::Direction>(dir) : curr.firstDir;
+            q.push({nx, ny, curr.steps + 1, firstDir});
+        }
+    }
+    return GraphObject::none;
 }
