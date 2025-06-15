@@ -181,7 +181,11 @@ int StudentWorld::annoyAllNearbyActors(Actor* annoyer, int points, int radius) {
 
 // Reveal all objects within radius of x,y.
 void StudentWorld::revealAllNearbyObjects(int x, int y, int radius) {
-	// NOT YET IMPLEMENTED
+	for (Actor* a : levelActors) {
+		if (std::hypot(a->getX() - x, a->getY() - y) <= 12) {
+			a->setVisible(true);
+		}
+	}
 }
 
 // If the IceMan is within radius of a, return a pointer to the
