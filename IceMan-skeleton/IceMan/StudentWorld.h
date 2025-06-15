@@ -78,13 +78,13 @@ public:
     std::array<std::array<Ice*, 64>, 64>& getIceGrid() { return iceGrid; }
 
     void oilBarrelCreated() { m_oilBarrelsLeft++; }
+    bool allIceAtCoords(int x, int y, bool mod) const;
+
 
 private:
     void iceGridAction(bool option);
     void generateLevelActors();
-    bool allIceAtCoords(int x, int y, bool mod) const;
-    std::pair<int, int> findNewLocation(int x1, int y1, int x2, int y2);
-    std::pair<int, int> findNewLocation2(int x1, int y1, int x2, int y2);
+    std::pair<int, int> findNewLocation(int x1, int y1, int x2, int y2, bool underIce);
 
     bool getTrueByChance(double chance);
     void createHardcoreProtestor();

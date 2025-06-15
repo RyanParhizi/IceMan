@@ -172,6 +172,7 @@ public:
     virtual bool canHurtIceMan() const { return false; }
 
 private:
+    bool spawnTickDelay = true;
     int range = 4;
 };
 

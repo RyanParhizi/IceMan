@@ -1,6 +1,5 @@
 #include "StudentWorld.h"
 #include <algorithm>
-#include <random>
 #include <cmath>
 #include <sstream>
 #include <iomanip>
@@ -12,57 +11,83 @@ GameWorld* createStudentWorld(std::string assetDir)
 
 StudentWorld::StudentWorld(std::string assetDir)
 	: GameWorld(assetDir) {
-
 }
+
 StudentWorld::~StudentWorld() {
 	cleanUp();
 }
 
 int StudentWorld::init() {
+	// Create the player's IceMan
 	player = new IceMan(this, 30, 60);
+	
+	// Generate Ice Grid
 	iceGridAction(1);
-    m_oilBarrelsLeft = std::min(2 + getLevel(), 21);
+	
+	// Set random seed for various functions
+	std::srand(static_cast<unsigned int>(time(nullptr)));
+
+	// Generate Level Actors
 	generateLevelActors();
+	
+	// Calculate target number of protestors for the current level
 	targetProtestorCount = std::min(15, int(2 + currentLevel * 1.5));
+	
+	// Begin game loop
 	return GWSTATUS_CONTINUE_GAME;
 }
 
 int StudentWorld::move() {
+	// Have the player's IceMan do something
 	player->move();
 
-	std::for_each(levelActors.begin(), levelActors.end(), // Call All Actors 
+	// Have all the actors in the level do something
+	std::for_each(levelActors.begin(), levelActors.end(),
 		[](Actor* actor) { actor->move(); });
 
-	levelActors.erase(std::remove_if(levelActors.begin(), levelActors.end(), // Remove Dead Actors
+	// Remove all the dead actors in the level
+	levelActors.erase(std::remove_if(levelActors.begin(), levelActors.end(),
 		[](Actor* actor) { if (!actor->isAlive()) { delete actor; return true; } return false;}), levelActors.end());
 
+	// Remove all the ice underneath the player
 	clearIce(player->getX(), player->getY());
 
+	// Add new actors to the level according to ambient spawn mechanics
 	addNewActors();
 
+	// Update display text at the top of the screen
 	updateDisplayText();
 
-	if (m_oilBarrelsLeft <= 0) { // Win Condition
+	// Win Condition
+	if (m_oilBarrelsLeft <= 0) {
 		currentLevel++;
 		playSound(SOUND_FINISHED_LEVEL);
 		return GWSTATUS_FINISHED_LEVEL;
 	}
 
+	// Lose Condition
 	if (player->getHitPoints() <= 0) { // Lose Condition
 		livesLeft--;
 		playSound(SOUND_PLAYER_GIVE_UP);
-		if (livesLeft <= 0) { // Game Over Condition
+		// Game Over Condition
+		if (livesLeft <= 0) {
 			//return GWSTATUS_GAME_OVER???
 		}
 		return GWSTATUS_PLAYER_DIED;
 	}
 
+	// Continue the game loop
 	return GWSTATUS_CONTINUE_GAME;
 }
 void StudentWorld::cleanUp() {
+	// Deallocate the player's IceMan
 	delete player;
 	player = nullptr;
+
+	// Deallocate the ice grid
 	iceGridAction(0);
+
+	// Deallocate all actors in the level
 	for (Actor* actor : levelActors) {
 		delete actor;
 		actor = nullptr;
@@ -72,12 +97,16 @@ void StudentWorld::cleanUp() {
 
 // Add an actor to the world.
 void StudentWorld::addActor(Actor* a) {
+	
 	levelActors.push_back(a);
 }
 
 // Clear a 4x4 region of Ice.
 void StudentWorld::clearIce(int x, int y) {
+	
 	bool icePresent = false;
+	
+	// Delete ice in a 4x4 grid relative to the given coords
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			if (iceGrid[x + i][y + j]){
@@ -87,6 +116,8 @@ void StudentWorld::clearIce(int x, int y) {
 			iceGrid[x + i][y + j] = nullptr;
 		}
 	}
+
+	// Play sound if ice is destroied
 	if (icePresent) {
 		playSound(SOUND_DIG);
 	}
@@ -94,9 +125,13 @@ void StudentWorld::clearIce(int x, int y) {
 
 // Can actor move to x,y?
 bool StudentWorld::canActorMoveTo(Actor* a, int x, int y) const {
+	
+	// Out of bounds condition
 	if (x < 0 || 60 < x || y < 0 || 60 < y) {
 		return false;
 	}
+
+	// For all actors that cannot be passed through, stop the moving actor
 	for (Actor* actor : levelActors) {
 		if (!actor->canActorsPassThroughMe() && actor != a) {
 			if (x - 4 < actor->getX() && actor->getX() < x + 4 &&
@@ -105,6 +140,8 @@ bool StudentWorld::canActorMoveTo(Actor* a, int x, int y) const {
 			}
 		}
 	}
+	
+	// If the moving actor is not the player, any ice stops the actor
 	if (a != player) {
 		if (!allIceAtCoords(x, y, false)) {
 			return false;
@@ -113,141 +150,119 @@ bool StudentWorld::canActorMoveTo(Actor* a, int x, int y) const {
 	return true;
 }
 
-// Annoy all other actors within radius of annoyer, returning the
-// number of actors annoyed.
+// Annoy all other actors within radius of annoyer, returning the number of actors annoyed.
 int StudentWorld::annoyAllNearbyActors(Actor* annoyer, int points, int radius) {
 	int annoiedActorCount = 0;
+	
 	for (Actor* actor : levelActors) {
+
+		// Actors cannot hurt themselves
 		if (actor == annoyer) {
 			continue;
 		}
+
+		// An actor is in annoyer's radious
 		if (std::hypot(annoyer->getX() - actor->getX(), annoyer->getY() - actor->getY()) <= radius) {
 			actor->annoy(points);
 			annoiedActorCount++;
 		}
 	}
+
+	// If the annoyer can hurt the ice man (not water squirt)
 	if(annoyer->canHurtIceMan()) {
 		if (std::hypot(annoyer->getX() - player->getX(), annoyer->getY() - player->getY()) <= radius) {
 			player->annoy(points);
 			annoiedActorCount++;
 		}
 	}
+
 	return annoiedActorCount;
 }
 
 // Reveal all objects within radius of x,y.
 void StudentWorld::revealAllNearbyObjects(int x, int y, int radius) {
-	
+	// NOT YET IMPLEMENTED
 }
 
 // If the IceMan is within radius of a, return a pointer to the
 // IceMan, otherwise null.
 Actor* StudentWorld::findNearbyIceMan(Actor* a, int radius) const {
-    double distance = std::hypot(a->getX() - player->getX(), a->getY() - player->getY());
-    if (distance <= radius) {
+    
+	// Get distance from actor to player
+	double distance = std::hypot(a->getX() - player->getX(), a->getY() - player->getY());
+    
+	if (distance <= radius) {
         return player;
     }
-    return nullptr;
+    
+	return nullptr;
 }
 
 // If at least one actor that can pick things up is within radius of a,
 // return a pointer to one of them, otherwise null.
 Actor* StudentWorld::findNearbyPickerUpper(Actor* a, int radius) const {
+	// NOT YET IMPLEMENTED
 	return nullptr;
 }
 
 // Annoy the IceMan.
 void StudentWorld::annoyIceMan() {
-
+	// NOT YET IMPLEMENTED
 }
 
 // Give IceMan some sonar charges.
 void StudentWorld::giveIceManSonar() {
-
+	// NOT YET IMPLEMENTED
 }
 
 // Give IceMan some water.
 void StudentWorld::giveIceManWater() {
-
+	// NOT YET IMPLEMENTED
 }
 
 // Is the Actor a facing toward the IceMan?
 bool StudentWorld::facingTowardIceMan(Actor* a) const {
+	// NOT YET IMPLEMENTED
 	return false;
 }
 
 // If the Actor a has a clear line of sight to the IceMan, return
 // the direction to the IceMan, otherwise GraphObject::none.
 GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
+	// NOT YET IMPLEMENTED
 	return GraphObject::right;
 }
 
 // Return whether the Actor a is within radius of IceMan.
 bool StudentWorld::isNearIceMan(Actor* a, int radius) const {
+	// NOT YET IMPLEMENTED
 	return false;
 }
 
 // Determine the direction of the first move a quitting protester
 // makes to leave the oil field.
 GraphObject::Direction StudentWorld::determineFirstMoveToExit(int x, int y) {
+	// NOT YET IMPLEMENTED
 	return GraphObject::right;
 }
 
 // Determine the direction of the first move a hardcore protester
 // makes to approach the IceMan.
 GraphObject::Direction StudentWorld::determineFirstMoveToIceMan(int x, int y) {
+	// NOT YET IMPLEMENTED
 	return GraphObject::right;
 }
 
-void StudentWorld::iceGridAction(bool option) {
-	int colN = 0;
-	for (auto& iceCol : iceGrid) {
-		int rowN = 0;
-		for (auto& iceBlock : iceCol) {
-			if ((colN < 30 || colN > 33 || rowN < 4) && rowN < 60) {
-				if (option) {
-					iceBlock = new Ice(this, colN, rowN);
-				}
-				else {
-					delete iceBlock;
-					iceBlock = nullptr;
-				}
-			}
-			rowN++;
-		}
-		colN++;
-	}
-}
+// Depending on the arguments, this function will either return
+// true to a 4x4 area being filled with ice or empty of ice, or
+// false if it's a mix of ice and no ice
+bool StudentWorld::allIceAtCoords(int x, int y, bool mode) const {
 
-void StudentWorld::generateLevelActors() {
-	int boulderCount = std::min(currentLevel / 2 + 2, 9);
-	int goldCount = std::max(5 - currentLevel / 2, 2);
-	int barrelCount = std::min(2 + currentLevel, 21);
-
-	std::srand(static_cast<unsigned int>(time(nullptr)));
-
-	for (int i = 0; i < boulderCount; i++) {
-		std::pair<int, int> newLocation = findNewLocation(0, 20, 60, 56);
-		addActor(new Boulder(this, newLocation.first, newLocation.second));
-		clearIce(newLocation.first, newLocation.second);
-	}
-	for (int i = 0; i < goldCount; i++) {
-		std::pair<int, int> newLocation = findNewLocation(0, 0, 60, 60);
-        addActor(new GoldNugget(this, newLocation.first, newLocation.second,
-                 false,    // temporary? (false = permanent)
-                 true,     // pickupByIceMan? (true = Iceman can pick it up)
-                 true));
-	}
-	for (int i = 0; i < barrelCount; i++) {
-		std::pair<int, int> newLocation = findNewLocation(0, 0, 60, 60);
-		addActor(new OilBarrel(this, newLocation.first, newLocation.second));
-	}
-}
-
-bool StudentWorld::allIceAtCoords(int x, int y, bool mod) const {
+	// Flags for return value
 	bool allIce = true;
 	bool noIce = true;
 
+	// Check for ice and update flags
 	for (int i = x; i < x + 4; i++) {
 		for (int j = y; j < y + 4; j++) {
 			if (iceGrid[i][j]) {
@@ -259,49 +274,127 @@ bool StudentWorld::allIceAtCoords(int x, int y, bool mod) const {
 		}
 	}
 
-	if (mod == true) { return allIce; }
-	if (mod == false) { return noIce; }
+	// If mode is true, will return true if area is filled with ice
+	if (mode == true) { return allIce; }
 
+	// If mode is false, will return true if area is empty of ice
+	if (mode == false) { return noIce; }
+
+	// Return false for a mix of ice and no ice in the area.
+	return false;
 }
 
-std::pair<int, int> StudentWorld::findNewLocation(int x1, int y1, int x2, int y2) { // Under the ice for starting actors
-	for(int loops = 0; loops < 60*60; loops++) {
+
+// Depending on the argument, this function will either create or destroy the ice grid.
+void StudentWorld::iceGridAction(bool option) {
+	
+	// For each column of ice
+	int colN = 0;
+	for (auto& iceCol : iceGrid) {
+
+		// For each row of ice (for each ice block in a column)
+		int rowN = 0;
+		for (auto& iceBlock : iceCol) {
+
+			// Ice grid shape condtion
+			if ((colN < 30 || colN > 33 || rowN < 4) && rowN < 60) {
+
+				// Option true generates ice grid
+				if (option) {
+					iceBlock = new Ice(this, colN, rowN);
+				}
+				// Option false desrtoys ice grid
+				else {
+					delete iceBlock;
+					iceBlock = nullptr;
+				}
+			}
+			rowN++;
+		}
+		colN++;
+	}
+}
+
+// This generates all the actors present at the start of a level
+void StudentWorld::generateLevelActors() {
+
+	// Calculate needed initial actors for the given level
+	int boulderCount = std::min(currentLevel / 2 + 2, 9);
+	int goldCount = std::max(5 - currentLevel / 2, 2);
+	int barrelCount = std::min(2 + currentLevel, 21);
+
+	// Generate boulders // These segments share similar code. Consider compressing into single template function.
+	for (int i = 0; i < boulderCount; i++) {
+		std::pair<int, int> newLocation = findNewLocation(0, 20, 60, 56, true);
+		if (newLocation.first == -1 && newLocation.second == -1) { break; } // Bad coords, no space, skip generation
+		addActor(new Boulder(this, newLocation.first, newLocation.second));
+		clearIce(newLocation.first, newLocation.second);
+	}
+
+	// Generate gold nuggets
+	for (int i = 0; i < goldCount; i++) {
+		std::pair<int, int> newLocation = findNewLocation(0, 0, 60, 60, true);
+		if (newLocation.first == -1 && newLocation.second == -1) { break; } // Bad coords, no space, skip generation
+        addActor(new GoldNugget(this, newLocation.first, newLocation.second,
+                 false,    // temporary? (false = permanent)
+                 true,     // pickupByIceMan? (true = Iceman can pick it up)
+                 true));
+	}
+
+	// Generate oil barrels
+	for (int i = 0; i < barrelCount; i++) {
+		std::pair<int, int> newLocation = findNewLocation(0, 0, 60, 60, true);
+		if (newLocation.first == -1 && newLocation.second == -1) { break; } // Bad coords, no space, skip generation
+		addActor(new OilBarrel(this, newLocation.first, newLocation.second));
+	}
+}
+
+std::pair<int, int> StudentWorld::findNewLocation(int x1, int y1, int x2, int y2, bool underIce) { // Under the ice for starting actors
+	
+	// Only try generating new positions so many times (in case there is no more room left to avoid infinite loop)
+	for(int loops = 0; loops < 3600; loops++) {
+
+		// Generate potential location
 		int newX = std::rand() % (x2 - x1 + 1) + x1;
 		int newY = std::rand() % (y2 - y1 + 1) + y1;
-		if (allIceAtCoords(newX, newY, true)) {
+
+		// Check for are full of ice
+		if (allIceAtCoords(newX, newY, underIce)) {
+
+			// If new location is not under the ice (water pool), there are no further restructions 
+			if (!underIce) {
+				return std::pair<int, int>(newX, newY);
+			}
+			// Otherwise check spacing
+
+			// For all actors, check proximity and update 'too close' flag if necessry
 			bool tooClose = false;
 			for (Actor* actor : levelActors) {
 				if (std::hypot(newX - actor->getX(), newY - actor->getY()) < 6) {
 					tooClose = true;
 				}
 			}
+
+			// If potential location is NOT too close to any existing actor, or
+			// return that new location
 			if (!tooClose) {
 				return std::pair<int, int>(newX, newY);
 			}
+			// Otherwise, try again
 		}
 	}
-	std::cerr << "findNewLocation() has failed.";
-	return std::pair<int, int>(0, 0);
+
+	// If this fails, cerr and return bad coords
+	std::cerr << "findNewLocation() has failed. Level is full after 3600 spawn attempts.";
+	return std::pair<int, int>(-1, -1);
 }
 
-std::pair<int, int> StudentWorld::findNewLocation2(int x1, int y1, int x2, int y2) { // In a clearing for water pools // Consider combining with previous version somehow.
-	for (int loops = 0; loops < 60 * 60; loops++) {
-		int newX = std::rand() % (x2 - x1 + 1) + x1;
-		int newY = std::rand() % (y2 - y1 + 1) + y1;
-		if (allIceAtCoords(newX, newY, false)) {
-				return std::pair<int, int>(newX, newY);
-		}
-	}
-	std::cerr << "findNewLocation() has failed.";
-	return std::pair<int, int>(0, 0);
-}
-
-
+// Will return true depending on passed in decimal chance
 bool StudentWorld::getTrueByChance(double chance) {
-	int roll = rand();
-	double normalized = static_cast<double>(roll) / RAND_MAX;
-	return normalized < chance;
+	return (static_cast<double>(rand()) / RAND_MAX) < chance;
 }
+
+// This set of functions can probably be inlined
 
 void StudentWorld::createHardcoreProtestor() {
 	addActor(new HardcoreProtester(this, 60, 60, IID_HARD_CORE_PROTESTER));
@@ -316,18 +409,25 @@ void StudentWorld::createSonarKit() {
 }
 
 void StudentWorld::createWaterPool() {
-	std::pair<int, int> newLocation = findNewLocation2(0, 0, 60, 60);
+	std::pair<int, int> newLocation = findNewLocation(0, 0, 60, 60, false);
 	addActor(new WaterPool(this, newLocation.first, newLocation.second));
 }
 
+// Add new actors to the level according to ambient spawn mechanics
 void StudentWorld::addNewActors() {
+	
+	// Creating a protester
 	if (protesterSpawnTimer <= 0) {
 		if (currentProtesterCount < targetProtestorCount) {
-			if (getTrueByChance(std::min(90., currentLevel * 10. + 30)/100)) { // Chance of creating hardcore protestor
-				createHardcoreProtestor();
+
+			// Chance of creating hardcore protestor
+			if (getTrueByChance(std::min(90., currentLevel * 10. + 30)/100)) {
+				addActor(new HardcoreProtester(this, 60, 60, IID_HARD_CORE_PROTESTER));
 			}
+
+			// Chance of creating regular protester
 			else {
-				createRegularProtestor();
+				addActor(new RegularProtester(this, 60, 60, IID_PROTESTER));
 			}
 		}
 		protesterSpawnTimer = std::max(25, 200 - currentLevel);
@@ -336,21 +436,31 @@ void StudentWorld::addNewActors() {
 		protesterSpawnTimer--;
 	}
 
-	if (getTrueByChance(1. / (currentLevel * 30 + 290))) { // Change of creating goodie
-		if (getTrueByChance(1. / 5)) { // Chance of goodie being water
-			createSonarKit();
+	// Creating a goodie
+	if (getTrueByChance(1. / (currentLevel * 30 + 290))) {
+		
+		// Chance of creating a sonar kit
+		if (getTrueByChance(1. / 5)) {
+			addActor(new SonarKit(this, 0, 60, currentLevel));
 		}
+
+		// Chance of creating a water pool
 		else {
-			createWaterPool();
+			std::pair<int, int> newLocation = findNewLocation(0, 0, 60, 60, false);
+			addActor(new WaterPool(this, newLocation.first, newLocation.second));
 		}
 	}
 
 
 }
 
+// Update display text at the top of the screen
 void StudentWorld::updateDisplayText() {
+
+	// Create string stream
 	std::ostringstream displayText;
 
+	// Build string stream
 	using namespace std;
 	displayText << "Lvl: " << right << setw(2) << currentLevel << "  "
 		<< "Lives: " << setw(1) << livesLeft << "  "
@@ -361,9 +471,11 @@ void StudentWorld::updateDisplayText() {
 		<< "Sonar: " << setw(2) << player->getSonar() << "  "
 		<< "Scr: " << setw(6) << setfill('0') << currentScore;
 
+	// Pass string stream to inherited function for update
 	setGameStatText(displayText.str());
 }
 
+// Adds amount to current score
 void StudentWorld::addToScore(int amount) {
 	currentScore += amount;
 }
