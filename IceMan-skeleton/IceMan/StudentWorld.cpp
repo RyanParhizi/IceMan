@@ -209,8 +209,14 @@ Actor* StudentWorld::findNearbyIceMan(Actor* a, int radius) const {
 // If at least one actor that can pick things up is within radius of a,
 // return a pointer to one of them, otherwise null.
 Actor* StudentWorld::findNearbyPickerUpper(Actor* a, int radius) const {
-	// NOT YET IMPLEMENTED
-	return nullptr;
+
+    for (Actor* actor : levelActors) {
+        if (actor->canPickThingsUp() &&
+            std::hypot(a->getX() - actor->getX(), a->getY() - actor->getY()) <= radius) {
+            return actor;
+        }
+    }
+    return nullptr;
 }
 
 // Annoy the IceMan.
