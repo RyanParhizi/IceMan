@@ -228,6 +228,11 @@ void Protester::move() {
         }
     }
 
+    // 5(hardcore). Seek out IceMan
+    if (hardcoreFunctionality()) {
+        return;
+    }
+
     // 5. Line of sight to Iceman, more than 4 units away, and path is clear
     GraphObject::Direction losDir = getWorld()->lineOfSightToIceMan(this);
     if (losDir != GraphObject::none) {
@@ -362,7 +367,22 @@ void HardcoreProtester::move() {
 void HardcoreProtester::addGold() {
     getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD);
     getWorld()->increaseScore(50);
-    mustLeaveOilField = true;
+    restTicks = std::max(50, 100 - getWorld()->getLevel() * 10);
+}
+
+bool HardcoreProtester::hardcoreFunctionality()
+{
+    static int M = 16 + getWorld()->getLevel() * 2;
+
+    GraphObject::Direction dir = getWorld()->determineFirstMoveToIceMan(getX(), getY(), M);
+
+    if (dir == GraphObject::none) {
+        return false;
+    }
+    else {
+        processMovementInput(dir);
+        return true;
+    }
 }
 
 

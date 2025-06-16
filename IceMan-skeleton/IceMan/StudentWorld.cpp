@@ -311,14 +311,14 @@ bool StudentWorld::isNearIceMan(Actor* a, int radius) const {
 // Determine the direction of the first move a quitting protester
 // makes to leave the oil field.
 GraphObject::Direction StudentWorld::determineFirstMoveToExit(int x, int y) {
-	return pathFind(x, y, 60, 60);
+	return pathFind(x, y, 60, 60, NULL);
 }
 
 // Determine the direction of the first move a hardcore protester
 // makes to approach the IceMan.
-GraphObject::Direction StudentWorld::determineFirstMoveToIceMan(int x, int y) {
+GraphObject::Direction StudentWorld::determineFirstMoveToIceMan(int x, int y, int depthLimit) {
 	// NOT YET IMPLEMENTED
-	return pathFind(x, y, player->getX(), player->getY());
+	return pathFind(x, y, player->getX(), player->getY(), depthLimit);
 }
 
 // Depending on the arguments, this function will either return
@@ -549,7 +549,7 @@ void StudentWorld::addToScore(int amount) {
 }
 
 // Returns the first movement direction to get from (x1, y2) to (x2, y2)
-GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
+GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2, int depthLimit)
 {
 	if (x1 == x2 && y1 == y2) {
 		return GraphObject::none;
@@ -559,7 +559,7 @@ GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
 	int dy[] = { 0, 1, -1, 0, 0 };
 
 	bool visited[61][61] = { false };
-	std::queue<std::tuple<int, int, GraphObject::Direction>> searchQueue;
+	std::queue<std::tuple<int, int, GraphObject::Direction, int>> searchQueue;
 	
 	visited[x1][y1] = true;
 	
@@ -571,14 +571,15 @@ GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
 
 		if (canActorMoveTo(nullptr, pathStartX, pathStartY)) {
 			visited[pathStartX][pathStartY] = true;
-			searchQueue.push({ pathStartX, pathStartY, GraphObject::Direction(startingDirection)});
+			searchQueue.push({ pathStartX, pathStartY, GraphObject::Direction(startingDirection), 1 });
 		}
 	}
 	
-	while (!searchQueue.empty()) {
+while (!searchQueue.empty()) {
 		int x = std::get<0>(searchQueue.front());
 		int y = std::get<1>(searchQueue.front());
 		GraphObject::Direction startingDirection = std::get<2>(searchQueue.front());
+		int depth = std::get<3>(searchQueue.front());
 
 		if (startingDirection == GraphObject::right) {
 			int* c = nullptr;
@@ -604,11 +605,17 @@ GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
 
 			if (canActorMoveTo(nullptr, pathNextX, pathNextY) && !visited[pathNextX][pathNextY]) {
 				visited[pathNextX][pathNextY] = true;
-				searchQueue.push({ pathNextX, pathNextY, GraphObject::Direction(startingDirection) });
+				searchQueue.push({ pathNextX, pathNextY, GraphObject::Direction(startingDirection), depth++ });
 			}
 		}
 
 		searchQueue.pop();
+
+		if (depthLimit != NULL) {
+			if (depth >= depthLimit) {
+				break;
+			}
+		}
 	}
 	return GraphObject::none;
 }
