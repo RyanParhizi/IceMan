@@ -95,7 +95,7 @@ void StudentWorld::cleanUp() {
 	}
 	levelActors.clear();
 
-	// Prep for next level gen
+	// Protester timer prep for next level gen
 	protesterSpawnTimer = 0;
 }
 
