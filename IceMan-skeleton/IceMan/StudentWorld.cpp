@@ -94,6 +94,9 @@ void StudentWorld::cleanUp() {
 		actor = nullptr;
 	}
 	levelActors.clear();
+
+	// Prep for next level gen
+	protesterSpawnTimer = 0;
 }
 
 // Add an actor to the world.
