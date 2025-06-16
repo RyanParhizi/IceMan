@@ -1,8 +1,12 @@
-#include "StudentWorld.h"
+#include <queue>
+#include <vector>
+#include <utility>
 #include <algorithm>
-#include <cmath>
+#include "StudentWorld.h"
+#include "Actor.h"
 #include <sstream>
 #include <iomanip>
+#include <queue>
 
 GameWorld* createStudentWorld(std::string assetDir)
 {
@@ -233,8 +237,63 @@ bool StudentWorld::facingTowardIceMan(Actor* a) const {
 // If the Actor a has a clear line of sight to the IceMan, return
 // the direction to the IceMan, otherwise GraphObject::none.
 GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
-	// NOT YET IMPLEMENTED
-	return GraphObject::right;
+
+	GraphObject::Direction relativeDirection = GraphObject::none;
+
+	if (a->getX() == player->getX()) {
+		if (a->getY() < player->getY()) {
+			relativeDirection = GraphObject::up;
+		}
+		else if (a->getY() > player->getY()) {
+			relativeDirection = GraphObject::down;
+		}
+	}
+	else if (a->getY() == player->getY()) {
+		if (a->getX() < player->getX()) {
+			relativeDirection = GraphObject::right;
+		}
+		else if (a->getX() > player->getX()) {
+			relativeDirection = GraphObject::left;
+		}
+	}
+
+	switch (relativeDirection) {
+	case GraphObject::none:
+		return GraphObject::none;
+		break;
+	case GraphObject::up:
+		for (int i = a->getY(); i <= player->getY(); i++) {
+			if (!canActorMoveTo(nullptr, a->getX(), i)) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::up;
+		break;
+	case GraphObject::down:
+		for (int i = a->getY(); i >= player->getY(); i--) {
+			if (!canActorMoveTo(nullptr, a->getX(), i)) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::down;
+		break;
+	case GraphObject::left:
+		for (int i = a->getX(); i >= player->getX(); i--) {
+			if (!canActorMoveTo(nullptr, i, a->getY())) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::left;
+		break;
+	case GraphObject::right:
+		for (int i = a->getX(); i <= player->getX(); i++) {
+			if (!canActorMoveTo(nullptr, i, a->getY())) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::right;
+		break;
+	}
 }
 
 // Return whether the Actor a is within radius of IceMan.
@@ -246,15 +305,14 @@ bool StudentWorld::isNearIceMan(Actor* a, int radius) const {
 // Determine the direction of the first move a quitting protester
 // makes to leave the oil field.
 GraphObject::Direction StudentWorld::determineFirstMoveToExit(int x, int y) {
-	// NOT YET IMPLEMENTED
-	return GraphObject::right;
+	return pathFind(x, y, 60, 60);
 }
 
 // Determine the direction of the first move a hardcore protester
 // makes to approach the IceMan.
 GraphObject::Direction StudentWorld::determineFirstMoveToIceMan(int x, int y) {
 	// NOT YET IMPLEMENTED
-	return GraphObject::right;
+	return pathFind(x, y, player->getX(), player->getY());
 }
 
 // Depending on the arguments, this function will either return
@@ -482,4 +540,136 @@ void StudentWorld::updateDisplayText() {
 // Adds amount to current score
 void StudentWorld::addToScore(int amount) {
 	currentScore += amount;
+}
+
+// Returns the first movement direction to get from (x1, y2) to (x2, y2)
+GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
+{
+	if (x1 == x2 && y1 == y2) {
+		return GraphObject::none;
+	}
+
+	int dx[] = { 0, 0, 0, -1, 1 };
+	int dy[] = { 0, 1, -1, 0, 0 };
+
+	bool visited[61][61] = { false };
+	std::queue<std::tuple<int, int, GraphObject::Direction>> searchQueue;
+	
+	visited[x1][y1] = true;
+	
+	// Begin search paths from surrounding coords and store starting direction
+							// Up				  // Right			// -> Down -> Left ->	
+	for (int startingDirection = 1; startingDirection <= 4; startingDirection++) {
+		int pathStartX = x1 + dx[startingDirection];
+		int pathStartY = y1 + dy[startingDirection];
+
+		if (canActorMoveTo(nullptr, pathStartX, pathStartY)) {
+			visited[pathStartX][pathStartY] = true;
+			searchQueue.push({ pathStartX, pathStartY, GraphObject::Direction(startingDirection)});
+		}
+	}
+	
+	while (!searchQueue.empty()) {
+		int x = std::get<0>(searchQueue.front());
+		int y = std::get<1>(searchQueue.front());
+		GraphObject::Direction startingDirection = std::get<2>(searchQueue.front());
+
+		if (startingDirection == GraphObject::right) {
+			int* c = nullptr;
+		}
+
+		// End found, return starting direction
+		if (x == x2 && y == y2) {
+			return startingDirection;
+		}
+
+		for (int nextDirection = 1; nextDirection <= 4; nextDirection++) {
+			int pathNextX = x + dx[nextDirection];
+			int pathNextY = y + dy[nextDirection];
+			
+			if (visited[pathNextX][pathNextY])
+			{
+				visited;
+				pathNextX;
+				pathNextY;
+				int* b = nullptr;
+
+			}
+
+			if (canActorMoveTo(nullptr, pathNextX, pathNextY) && !visited[pathNextX][pathNextY]) {
+				visited[pathNextX][pathNextY] = true;
+				searchQueue.push({ pathNextX, pathNextY, GraphObject::Direction(startingDirection) });
+			}
+		}
+
+		searchQueue.pop();
+	}
+	return GraphObject::none;
+}
+
+void StudentWorld::getIceManLocation(int& x, int& y) const {
+    if (player) {
+        x = player->getX();
+        y = player->getY();
+    }
+}
+
+// Helper for BFS
+struct Node {
+    int x, y;
+    int steps;
+    GraphObject::Direction firstDir;
+};
+
+int StudentWorld::stepsToTarget(int startX, int startY, int endX, int endY) const {
+    const int WIDTH = 64, HEIGHT = 64; // adjust as needed
+    bool visited[WIDTH][HEIGHT] = {false};
+    std::queue<Node> q;
+    q.push({startX, startY, 0, GraphObject::none});
+    visited[startX][startY] = true;
+
+    while (!q.empty()) {
+        Node curr = q.front(); q.pop();
+        if (curr.x == endX && curr.y == endY)
+            return curr.steps;
+
+        const int dx[4] = { -1, 1, 0, 0 };
+        const int dy[4] = { 0, 0, 1, -1 };
+        for (int dir = 0; dir < 4; ++dir) {
+            int nx = curr.x + dx[dir], ny = curr.y + dy[dir];
+            if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
+            if (visited[nx][ny]) continue;
+            if (!canActorMoveTo(nullptr, nx, ny)) continue;
+            visited[nx][ny] = true;
+            q.push({nx, ny, curr.steps + 1, curr.steps == 0 ? static_cast<GraphObject::Direction>(dir) : curr.firstDir});
+        }
+    }
+    return -1;
+}
+
+GraphObject::Direction StudentWorld::determineFirstMoveToTarget(int startX, int startY, int endX, int endY) const {
+    const int WIDTH = 64, HEIGHT = 64; // adjust as needed
+    bool visited[WIDTH][HEIGHT] = {false};
+    std::queue<Node> q;
+    q.push({startX, startY, 0, GraphObject::none});
+    visited[startX][startY] = true;
+
+    while (!q.empty()) {
+        Node curr = q.front(); q.pop();
+        if (curr.x == endX && curr.y == endY)
+            return curr.firstDir;
+
+        const int dx[4] = { -1, 1, 0, 0 };
+        const int dy[4] = { 0, 0, 1, -1 };
+        for (int dir = 0; dir < 4; ++dir) {
+            int nx = curr.x + dx[dir], ny = curr.y + dy[dir];
+            if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
+            if (visited[nx][ny]) continue;
+            if (!canActorMoveTo(nullptr, nx, ny)) continue;
+            visited[nx][ny] = true;
+            GraphObject::Direction firstDir = (curr.steps == 0) ? static_cast<GraphObject::Direction>(dir) : curr.firstDir;
+            q.push({nx, ny, curr.steps + 1, firstDir});
+        }
+    }
+    return GraphObject::none;
 }

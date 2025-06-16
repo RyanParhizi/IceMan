@@ -75,6 +75,15 @@ public:
     // makes to approach the IceMan.
     GraphObject::Direction determineFirstMoveToIceMan(int x, int y);
 
+    // Returns Iceman's current location
+    void getIceManLocation(int& x, int& y) const;
+
+    // Returns the number of steps from (startX, startY) to (endX, endY) using BFS, or -1 if unreachable
+    int stepsToTarget(int startX, int startY, int endX, int endY) const;
+
+    // Returns the first direction to move from (startX, startY) toward (endX, endY) along the shortest path
+    GraphObject::Direction determineFirstMoveToTarget(int startX, int startY, int endX, int endY) const;
+
     std::array<std::array<Ice*, 64>, 64>& getIceGrid() { return iceGrid; }
 
     void oilBarrelCreated() { m_oilBarrelsLeft++; }
@@ -96,6 +105,8 @@ private:
     void updateDisplayText();
 
     void addToScore(int amount);
+
+    GraphObject::Direction pathFind(int x1, int y1, int x2, int y2);
    
     IceMan* player = nullptr;
     std::array<std::array<Ice*, 64>, 64> iceGrid{};

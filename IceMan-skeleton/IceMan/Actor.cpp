@@ -101,19 +101,20 @@ void IceMan::move() {
     case KEY_PRESS_SPACE:
         if(water > 0) {
             sprayWater();
-            break;
         }
+        break;
     case KEY_PRESS_TAB:
         if (gold > 0) {
             getWorld()->addActor(new GoldNugget(getWorld(), getX(), getY(), true, false, true));
             gold--;
-            break;
         }
+        break;
     case 122: // KEY_PRESS_Z doesn't exist...
         if (sonar > 0) {
             getWorld()->revealAllNearbyObjects(getX(), getY(), 12);
             sonar--;
         }
+        break;
     }
 }
 bool IceMan::annoy(unsigned int amount) {
@@ -162,17 +163,171 @@ void IceMan::sprayWater() // Spawn position looks odd compared to demo.
 
 Protester::Protester(StudentWorld* world, int startX, int startY, int imageID,
     unsigned int hitPoints, unsigned int score)
-    : Agent(world, startX, startY, left, imageID, hitPoints) {
-
+    : Agent(world, startX, startY, left, imageID, hitPoints),
+      mustLeaveOilField(false), m_score(score)
+{
+    restTicks = std::max(0, 3 - world->getLevel() / 4);
+    numSquaresToMoveInCurrentDirection = 8 + rand() % 53;
+    shoutCooldown = 0;
+    turnCooldown = 0;
 }
+
 void Protester::move() {
+    if (!isAlive()) return;
 
+    // 1. Resting state
+    if (restTicks > 0) {
+        restTicks--;
+        return;
+    }
+    restTicks = 0*0*0*0*0*0*0*0*std::max(0, 3 - getWorld()->getLevel() / 4);
+                // DEBUGGING MODIFICATION || DELETE BEFORE PUSH
+    // 2. Leave-the-oil-field state
+    if (mustLeaveOilField) {
+        if (getX() == 60 && getY() == 60) {
+            setDead();
+            return;
+        }
+        // Move one step toward exit using BFS direction
+        GraphObject::Direction dir = getWorld()->determineFirstMoveToExit(getX(), getY());
+        processMovementInput(dir); // This should be a viable substitute for the code below
+        //int dx = 0, dy = 0;
+        //switch (dir) {
+        //    case left: dx = -1; break;
+        //    case right: dx = 1; break;
+        //    case up: dy = 1; break;
+        //    case down: dy = -1; break;
+        //    case none: break; // <-- this is fine
+        //    // default: break; // optional
+        //}
+        //moveToIfPossible(getX() + dx, getY() + dy);
+        return;
+    }
+
+    // 3. Shout cooldown
+    if (shoutCooldown > 0) shoutCooldown--;
+
+    // 4. Shout at Iceman if within 4 units and facing
+    Actor* iceman = getWorld()->findNearbyIceMan(this, 4);
+    if (iceman) {
+        int dx = iceman->getX() - getX();
+        int dy = iceman->getY() - getY();
+        bool facing = false;
+        switch (getDirection()) {
+            case left:  facing = (dx < 0 && dy == 0); break;
+            case right: facing = (dx > 0 && dy == 0); break;
+            case up:    facing = (dy > 0 && dx == 0); break;
+            case down:  facing = (dy < 0 && dx == 0); break;
+            default: break;
+        }
+        if (facing && shoutCooldown == 0) {
+            getWorld()->playSound(SOUND_PROTESTER_YELL);
+            iceman->annoy(2);
+            shoutCooldown = 15;
+            return;
+        }
+    }
+
+    // 5. Line of sight to Iceman, more than 4 units away, and path is clear
+    GraphObject::Direction losDir = getWorld()->lineOfSightToIceMan(this);
+    if (losDir != GraphObject::none) {
+        Actor* iceman = getWorld()->findNearbyIceMan(this, 100);
+        double dist = std::hypot(getX() - iceman->getX(), getY() - iceman->getY());
+        if (dist > 4.0) {
+            setDirection(losDir);
+            processMovementInput(losDir); // This should be a viable substitute for the code below
+            //int dx = 0, dy = 0;
+            //switch (losDir) {
+            //    case left: dx = -1; break;
+            //    case right: dx = 1; break;
+            //    case up: dy = 1; break;
+            //    case down: dy = -1; break;
+            //    default: break;
+            //}
+            //
+            //moveToIfPossible(getX() + dx, getY() + dy);
+            numSquaresToMoveInCurrentDirection = 0;
+            return;
+        }
+    }
+
+    // 6. Perpendicular turn every 200 non-resting ticks if possible
+    if (turnCooldown > 0)
+        turnCooldown--;
+    else {
+        std::vector<GraphObject::Direction> perpendiculars;
+        if (getDirection() == left || getDirection() == right) {
+            if (getWorld()->canActorMoveTo(this, getX(), getY() + 1)) perpendiculars.push_back(up);
+            if (getWorld()->canActorMoveTo(this, getX(), getY() - 1)) perpendiculars.push_back(down);
+        } else {
+            if (getWorld()->canActorMoveTo(this, getX() + 1, getY())) perpendiculars.push_back(right);
+            if (getWorld()->canActorMoveTo(this, getX() - 1, getY())) perpendiculars.push_back(left);
+        }
+        if (!perpendiculars.empty()) {
+            setDirection(perpendiculars[rand() % perpendiculars.size()]);
+            numSquaresToMoveInCurrentDirection = 8 + rand() % 53;
+            turnCooldown = 200;
+        }
+    }
+
+    // 7. Random walk if needed
+    if (numSquaresToMoveInCurrentDirection <= 0) {
+        std::vector<GraphObject::Direction> dirs;
+        if (getWorld()->canActorMoveTo(this, getX() + 1, getY())) dirs.push_back(right);
+        if (getWorld()->canActorMoveTo(this, getX() - 1, getY())) dirs.push_back(left);
+        if (getWorld()->canActorMoveTo(this, getX(), getY() + 1)) dirs.push_back(up);
+        if (getWorld()->canActorMoveTo(this, getX(), getY() - 1)) dirs.push_back(down);
+        if (!dirs.empty()) {
+            setDirection(dirs[rand() % dirs.size()]);
+            numSquaresToMoveInCurrentDirection = 8 + rand() % 53;
+        }
+    }
+
+    // 8. Try to move in current direction
+    if(processMovementInput(getDirection())) {
+    
+    //int dx = 0, dy = 0;
+    //switch (getDirection()) {
+    //    case right: dx = 1; break;
+    //    case left: dx = -1; break;
+    //    case up: dy = 1; break;
+    //    case down: dy = -1; break;
+    //    default: break;
+    //}
+    //if (getWorld()->canActorMoveTo(this, getX() + dx, getY() + dy)) {
+    //    moveTo(getX() + dx, getY() + dy);
+        numSquaresToMoveInCurrentDirection--;
+    } else {
+        numSquaresToMoveInCurrentDirection = 0;
+    }
 }
+
 bool Protester::annoy(unsigned int amount) {
-    return false;
-}
-void Protester::addGold() {
+    if (!isAlive() || mustLeaveOilField) return false;
+    hitPoints -= amount;
+    if (hitPoints <= 0) {
+        hitPoints = 0;
+        mustLeaveOilField = true;
+        getWorld()->playSound(SOUND_PROTESTER_GIVE_UP);
+        restTicks = 0;
+        if (amount == 2) { // Water Squirt
+            getWorld()->increaseScore(100);
+        }
+        else { // Boulder
+            getWorld()->increaseScore(500);
 
+        }
+    } else {
+        getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
+        restTicks = std::max(50, 100 - getWorld()->getLevel() * 10);
+    }
+    return true;
+}
+
+void Protester::addGold() {
+    getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD);
+    getWorld()->increaseScore(25);
+    mustLeaveOilField = true;
 }
 
 
@@ -183,24 +338,31 @@ RegularProtester::RegularProtester(StudentWorld* world, int startX, int startY, 
 
 }
 void RegularProtester::move() {
-
+    Protester::move();
 }
-void RegularProtester::addGold() {
 
+void RegularProtester::addGold() {
+    getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD);
+    getWorld()->increaseScore(25);
+    mustLeaveOilField = true;
 }
 
 
 // HardcoreProtester _______________________________________________________________________________
 
 HardcoreProtester::HardcoreProtester(StudentWorld* world, int startX, int startY, int imageID)
-    : Protester(world, startX, startY, IID_HARD_CORE_PROTESTER, 20, 250) {
-
+    : Protester(world, startX, startY, IID_HARD_CORE_PROTESTER, 20, 250) // Adjust hitpoints/score as needed
+{
 }
+
 void HardcoreProtester::move() {
-
+    Protester::move();
 }
-void HardcoreProtester::addGold() {
 
+void HardcoreProtester::addGold() {
+    getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD);
+    getWorld()->increaseScore(50);
+    mustLeaveOilField = true;
 }
 
 
@@ -290,7 +452,7 @@ ActivatingObject::ActivatingObject(StudentWorld* world, int startX, int startY, 
     int soundToPlay, bool activateOnPlayer, bool activateOnProtester, bool initallyActive)
     : Actor(world, startX, startY, right, true, imageID, 1, 2),
     soundToPlay(soundToPlay), activateOnPlayer(activateOnPlayer),
-    activateOnProtester(activateOnProtester), initiallyActive(initiallyActive){
+    activateOnProtester(activateOnProtester), initiallyActive(initallyActive){
 
 }
 void ActivatingObject::move() {
@@ -448,4 +610,3 @@ void WaterPool::move()
         setDead();
     }
 }
-

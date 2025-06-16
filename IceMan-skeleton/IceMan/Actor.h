@@ -118,14 +118,18 @@ public:
     virtual void addGold();
     virtual bool huntsIceMan() const { return true; }
 
-    // Set state to having given up protest
     void setMustLeaveOilField() { mustLeaveOilField = true; }
-
-    // Set number of ticks until next move
     void setTicksToNextMove() {}
-private:
+
+protected:
     bool mustLeaveOilField;
     int ticksToNextMove;
+
+    int restTicks;
+    int numSquaresToMoveInCurrentDirection;
+    int shoutCooldown;
+    int turnCooldown;
+    int m_score;
 };
 
 class RegularProtester : public Protester
