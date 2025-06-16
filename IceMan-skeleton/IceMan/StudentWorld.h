@@ -105,6 +105,8 @@ private:
     void updateDisplayText();
 
     void addToScore(int amount);
+
+    GraphObject::Direction pathFind(int x1, int y1, int x2, int y2);
    
     IceMan* player = nullptr;
     std::array<std::array<Ice*, 64>, 64> iceGrid{};

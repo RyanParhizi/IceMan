@@ -179,8 +179,8 @@ void Protester::move() {
         restTicks--;
         return;
     }
-    restTicks = std::max(0, 3 - getWorld()->getLevel() / 4);
-
+    restTicks = 0*0*0*0*0*0*0*0*std::max(0, 3 - getWorld()->getLevel() / 4);
+                // DEBUGGING MODIFICATION || DELETE BEFORE PUSH
     // 2. Leave-the-oil-field state
     if (mustLeaveOilField) {
         if (getX() == 60 && getY() == 60) {
@@ -189,16 +189,17 @@ void Protester::move() {
         }
         // Move one step toward exit using BFS direction
         GraphObject::Direction dir = getWorld()->determineFirstMoveToExit(getX(), getY());
-        int dx = 0, dy = 0;
-        switch (dir) {
-            case left: dx = -1; break;
-            case right: dx = 1; break;
-            case up: dy = 1; break;
-            case down: dy = -1; break;
-            case none: break; // <-- this is fine
-            // default: break; // optional
-        }
-        moveToIfPossible(getX() + dx, getY() + dy);
+        processMovementInput(dir); // This should be a viable substitute for the code below
+        //int dx = 0, dy = 0;
+        //switch (dir) {
+        //    case left: dx = -1; break;
+        //    case right: dx = 1; break;
+        //    case up: dy = 1; break;
+        //    case down: dy = -1; break;
+        //    case none: break; // <-- this is fine
+        //    // default: break; // optional
+        //}
+        //moveToIfPossible(getX() + dx, getY() + dy);
         return;
     }
 
@@ -233,15 +234,17 @@ void Protester::move() {
         double dist = std::hypot(getX() - iceman->getX(), getY() - iceman->getY());
         if (dist > 4.0) {
             setDirection(losDir);
-            int dx = 0, dy = 0;
-            switch (losDir) {
-                case left: dx = -1; break;
-                case right: dx = 1; break;
-                case up: dy = 1; break;
-                case down: dy = -1; break;
-                default: break;
-            }
-            moveToIfPossible(getX() + dx, getY() + dy);
+            processMovementInput(losDir); // This should be a viable substitute for the code below
+            //int dx = 0, dy = 0;
+            //switch (losDir) {
+            //    case left: dx = -1; break;
+            //    case right: dx = 1; break;
+            //    case up: dy = 1; break;
+            //    case down: dy = -1; break;
+            //    default: break;
+            //}
+            //
+            //moveToIfPossible(getX() + dx, getY() + dy);
             numSquaresToMoveInCurrentDirection = 0;
             return;
         }
@@ -280,16 +283,18 @@ void Protester::move() {
     }
 
     // 8. Try to move in current direction
-    int dx = 0, dy = 0;
-    switch (getDirection()) {
-        case right: dx = 1; break;
-        case left: dx = -1; break;
-        case up: dy = 1; break;
-        case down: dy = -1; break;
-        default: break;
-    }
-    if (getWorld()->canActorMoveTo(this, getX() + dx, getY() + dy)) {
-        moveTo(getX() + dx, getY() + dy);
+    if(processMovementInput(getDirection())) {
+    
+    //int dx = 0, dy = 0;
+    //switch (getDirection()) {
+    //    case right: dx = 1; break;
+    //    case left: dx = -1; break;
+    //    case up: dy = 1; break;
+    //    case down: dy = -1; break;
+    //    default: break;
+    //}
+    //if (getWorld()->canActorMoveTo(this, getX() + dx, getY() + dy)) {
+    //    moveTo(getX() + dx, getY() + dy);
         numSquaresToMoveInCurrentDirection--;
     } else {
         numSquaresToMoveInCurrentDirection = 0;
@@ -304,7 +309,13 @@ bool Protester::annoy(unsigned int amount) {
         mustLeaveOilField = true;
         getWorld()->playSound(SOUND_PROTESTER_GIVE_UP);
         restTicks = 0;
-        getWorld()->increaseScore(100); // You may want to pass in the correct score for boulder/squirt
+        if (amount == 2) { // Water Squirt
+            getWorld()->increaseScore(100);
+        }
+        else { // Boulder
+            getWorld()->increaseScore(500);
+
+        }
     } else {
         getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
         restTicks = std::max(50, 100 - getWorld()->getLevel() * 10);
@@ -343,7 +354,7 @@ HardcoreProtester::HardcoreProtester(StudentWorld* world, int startX, int startY
 {
 }
 
-void HardcoreProtester::move() { // this needs to use a mote advanced method
+void HardcoreProtester::move() {
     Protester::move();
 }
 

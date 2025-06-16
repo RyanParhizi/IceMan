@@ -6,6 +6,13 @@
 #include "Actor.h"
 #include <sstream>
 #include <iomanip>
+#include <queue>
+
+struct pathNode {
+	GraphObject::Direction comingFrom;
+	int x;
+	int y;
+};
 
 GameWorld* createStudentWorld(std::string assetDir)
 {
@@ -236,8 +243,63 @@ bool StudentWorld::facingTowardIceMan(Actor* a) const {
 // If the Actor a has a clear line of sight to the IceMan, return
 // the direction to the IceMan, otherwise GraphObject::none.
 GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
-	// NOT YET IMPLEMENTED
-	return GraphObject::right;
+
+	GraphObject::Direction relativeDirection = GraphObject::none;
+
+	if (a->getX() == player->getX()) {
+		if (a->getY() < player->getY()) {
+			relativeDirection = GraphObject::up;
+		}
+		else if (a->getY() > player->getY()) {
+			relativeDirection = GraphObject::down;
+		}
+	}
+	else if (a->getY() == player->getY()) {
+		if (a->getX() < player->getX()) {
+			relativeDirection = GraphObject::right;
+		}
+		else if (a->getX() > player->getX()) {
+			relativeDirection = GraphObject::left;
+		}
+	}
+
+	switch (relativeDirection) {
+	case GraphObject::none:
+		return GraphObject::none;
+		break;
+	case GraphObject::up:
+		for (int i = a->getY(); i <= player->getY(); i++) {
+			if (!canActorMoveTo(nullptr, a->getX(), i)) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::up;
+		break;
+	case GraphObject::down:
+		for (int i = a->getY(); i >= player->getY(); i--) {
+			if (!canActorMoveTo(nullptr, a->getX(), i)) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::down;
+		break;
+	case GraphObject::left:
+		for (int i = a->getX(); i >= player->getX(); i++) {
+			if (!canActorMoveTo(nullptr, i, a->getY())) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::left;
+		break;
+	case GraphObject::right:
+		for (int i = a->getX(); i <= player->getX(); i--) {
+			if (!canActorMoveTo(nullptr, i, a->getY())) {
+				return GraphObject::none;
+			}
+		}
+		return GraphObject::right;
+		break;
+	}
 }
 
 // Return whether the Actor a is within radius of IceMan.
@@ -249,15 +311,14 @@ bool StudentWorld::isNearIceMan(Actor* a, int radius) const {
 // Determine the direction of the first move a quitting protester
 // makes to leave the oil field.
 GraphObject::Direction StudentWorld::determineFirstMoveToExit(int x, int y) {
-	// NOT YET IMPLEMENTED
-	return GraphObject::right;
+	return pathFind(x, y, 60, 60);
 }
 
 // Determine the direction of the first move a hardcore protester
 // makes to approach the IceMan.
 GraphObject::Direction StudentWorld::determineFirstMoveToIceMan(int x, int y) {
 	// NOT YET IMPLEMENTED
-	return GraphObject::right;
+	return pathFind(x, y, player->getX(), player->getY());
 }
 
 // Depending on the arguments, this function will either return
@@ -485,6 +546,58 @@ void StudentWorld::updateDisplayText() {
 // Adds amount to current score
 void StudentWorld::addToScore(int amount) {
 	currentScore += amount;
+}
+
+// Returns the first movement direction to get from (x1, y2) to (x2, y2)
+GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
+{
+	if (x1 == x2 && y1 == y2) {
+		return GraphObject::none;
+	}
+
+	int dx[] = { 0, 0, 0, -1, 1 };
+	int dy[] = { 0, 1, -1, 0, 0 };
+
+	bool visited[60][60] = { false };
+	std::queue<std::tuple<int, int, GraphObject::Direction>> searchQueue;
+	
+	visited[x1][y1] = true;
+	
+	// Begin search paths from surrounding coords and store starting direction
+							// Up				  // Right			// -> Down -> Left ->	
+	for (int startingDirection = 1; startingDirection <= 4; startingDirection++) {
+		int pathStartX = x1 + dx[startingDirection];
+		int pathStartY = y1 + dy[startingDirection];
+
+		if (canActorMoveTo(nullptr, pathStartX, pathStartY)) {
+			visited[pathStartX][pathStartY] = true;
+			searchQueue.push({ pathStartX, pathStartY, GraphObject::Direction(startingDirection)});
+		}
+	}
+	
+	while (!searchQueue.empty()) {
+		int x = std::get<0>(searchQueue.front());
+		int y = std::get<1>(searchQueue.front());
+		GraphObject::Direction startingDirection = std::get<2>(searchQueue.front());
+
+		searchQueue.pop();
+
+		// End found, return starting direction
+		if (x == x2 && y == y2) {
+			return startingDirection;
+		}
+
+		for (int nextDirection = 1; nextDirection <= 4; nextDirection++) {
+			int pathNextX = x + dx[nextDirection];
+			int pathNextY = y + dy[nextDirection];
+			
+			if (canActorMoveTo(nullptr, pathNextX, pathNextY) && !visited[pathNextX][pathNextY]) {
+				visited[pathNextX][pathNextY] = true;
+				searchQueue.push({ pathNextX, pathNextY, GraphObject::Direction(startingDirection) });
+			}
+		}
+	}
+	return GraphObject::none;
 }
 
 void StudentWorld::getIceManLocation(int& x, int& y) const {
