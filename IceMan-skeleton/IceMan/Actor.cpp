@@ -441,10 +441,13 @@ bool Boulder::canActorsPassThroughMe() const {
 Squirt::Squirt(StudentWorld* world, int startX, int startY, Direction startDir)
     : Actor(world, startX, startY, startDir, true, IID_WATER_SPURT, 1, 1) {
     getWorld()->playSound(SOUND_PLAYER_SQUIRT);
-    if (!getWorld()->allIceAtCoords(getX(), getY(), false)) {
+    if (!getWorld()->canActorMoveTo(this, startX, startY)) {
+        setDead();
+    } else if (!getWorld()->allIceAtCoords(getX(), getY(), false)) {
         setDead();
     }
 }
+
 void Squirt::doSomething() {
 
 
