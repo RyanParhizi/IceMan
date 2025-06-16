@@ -72,11 +72,8 @@ int StudentWorld::move() {
 	// Lose Condition
 	if (player->getHitPoints() <= 0) { // Lose Condition
 		livesLeft--;
+		decLives(); // Completely forgot these functions were inhereted. Most of the inhereted functionality was recreated in this class.
 		playSound(SOUND_PLAYER_GIVE_UP);
-		// Game Over Condition
-		if (livesLeft <= 0) {
-			//return GWSTATUS_GAME_OVER???
-		}
 		return GWSTATUS_PLAYER_DIED;
 	}
 

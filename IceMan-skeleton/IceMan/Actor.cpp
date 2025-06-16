@@ -109,7 +109,7 @@ void IceMan::move() {
             gold--;
         }
         break;
-    case 122: // KEY_PRESS_Z doesn't exist...
+    case 'z': case 'Z':
         if (sonar > 0) {
             getWorld()->revealAllNearbyObjects(getX(), getY(), 12);
             sonar--;
@@ -180,8 +180,8 @@ void Protester::move() {
         restTicks--;
         return;
     }
-    restTicks = 0*0*0*0*0*0*0*0*std::max(0, 3 - getWorld()->getLevel() / 4);
-                // DEBUGGING MODIFICATION || DELETE BEFORE PUSH
+    restTicks = std::max(0, 3 - getWorld()->getLevel() / 4);
+
     // 2. Leave-the-oil-field state
     if (mustLeaveOilField) {
         if (getX() == 60 && getY() == 60) {
@@ -470,7 +470,7 @@ void Squirt::move() {
 
 ActivatingObject::ActivatingObject(StudentWorld* world, int startX, int startY, int imageID,
     int soundToPlay, bool activateOnPlayer, bool activateOnProtester, bool initallyActive)
-    : Actor(world, startX, startY, right, true, imageID, 1, 2),
+    : Actor(world, startX, startY, right, false, imageID, 1, 2),
     soundToPlay(soundToPlay), activateOnPlayer(activateOnPlayer),
     activateOnProtester(activateOnProtester), initiallyActive(initallyActive){
 
@@ -524,8 +524,8 @@ GoldNugget::GoldNugget(StudentWorld* world, int startX, int startY,
                       pickupByIceMan, !pickupByIceMan, visible),
       m_temporary(temporary), m_pickupByIceMan(pickupByIceMan)
 {
-    setVisible(visible);
     if (m_temporary) {
+        setVisible(visible);
         setTicksToLive(100); // Standard temporary lifetime
     }
 }
