@@ -628,6 +628,8 @@ void StudentWorld::getIceManLocation(int& x, int& y) const {
     }
 }
 
+// The following functions were rewriten and were themselves not utilized.
+
 // Helper for BFS
 struct Node {
     int x, y;
