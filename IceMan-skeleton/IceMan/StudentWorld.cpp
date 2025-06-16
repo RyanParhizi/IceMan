@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <queue>
 
-struct pathNode {
+struct pathNode { // Remove This
 	GraphObject::Direction comingFrom;
 	int x;
 	int y;
@@ -284,7 +284,7 @@ GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
 		return GraphObject::down;
 		break;
 	case GraphObject::left:
-		for (int i = a->getX(); i >= player->getX(); i++) {
+		for (int i = a->getX(); i >= player->getX(); i--) {
 			if (!canActorMoveTo(nullptr, i, a->getY())) {
 				return GraphObject::none;
 			}
@@ -292,7 +292,7 @@ GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
 		return GraphObject::left;
 		break;
 	case GraphObject::right:
-		for (int i = a->getX(); i <= player->getX(); i--) {
+		for (int i = a->getX(); i <= player->getX(); i++) {
 			if (!canActorMoveTo(nullptr, i, a->getY())) {
 				return GraphObject::none;
 			}
@@ -558,7 +558,7 @@ GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
 	int dx[] = { 0, 0, 0, -1, 1 };
 	int dy[] = { 0, 1, -1, 0, 0 };
 
-	bool visited[60][60] = { false };
+	bool visited[61][61] = { false };
 	std::queue<std::tuple<int, int, GraphObject::Direction>> searchQueue;
 	
 	visited[x1][y1] = true;
@@ -580,7 +580,9 @@ GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
 		int y = std::get<1>(searchQueue.front());
 		GraphObject::Direction startingDirection = std::get<2>(searchQueue.front());
 
-		searchQueue.pop();
+		if (startingDirection == GraphObject::right) {
+			int* c = nullptr;
+		}
 
 		// End found, return starting direction
 		if (x == x2 && y == y2) {
@@ -591,11 +593,22 @@ GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2)
 			int pathNextX = x + dx[nextDirection];
 			int pathNextY = y + dy[nextDirection];
 			
+			if (visited[pathNextX][pathNextY])
+			{
+				visited;
+				pathNextX;
+				pathNextY;
+				int* b = nullptr;
+
+			}
+
 			if (canActorMoveTo(nullptr, pathNextX, pathNextY) && !visited[pathNextX][pathNextY]) {
 				visited[pathNextX][pathNextY] = true;
 				searchQueue.push({ pathNextX, pathNextY, GraphObject::Direction(startingDirection) });
 			}
 		}
+
+		searchQueue.pop();
 	}
 	return GraphObject::none;
 }

@@ -101,19 +101,20 @@ void IceMan::move() {
     case KEY_PRESS_SPACE:
         if(water > 0) {
             sprayWater();
-            break;
         }
+        break;
     case KEY_PRESS_TAB:
         if (gold > 0) {
             getWorld()->addActor(new GoldNugget(getWorld(), getX(), getY(), true, false, true));
             gold--;
-            break;
         }
+        break;
     case 122: // KEY_PRESS_Z doesn't exist...
         if (sonar > 0) {
             getWorld()->revealAllNearbyObjects(getX(), getY(), 12);
             sonar--;
         }
+        break;
     }
 }
 bool IceMan::annoy(unsigned int amount) {
