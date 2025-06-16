@@ -6,7 +6,6 @@
 #include "Actor.h"
 #include <sstream>
 #include <iomanip>
-#include <queue>
 
 GameWorld* createStudentWorld(std::string assetDir)
 {
