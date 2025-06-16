@@ -8,12 +8,6 @@
 #include <iomanip>
 #include <queue>
 
-struct pathNode { // Remove This
-	GraphObject::Direction comingFrom;
-	int x;
-	int y;
-};
-
 GameWorld* createStudentWorld(std::string assetDir)
 {
 	return new StudentWorld(assetDir);
