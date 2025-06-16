@@ -219,27 +219,6 @@ Actor* StudentWorld::findNearbyPickerUpper(Actor* a, int radius) const {
     return nullptr;
 }
 
-// Annoy the IceMan.
-void StudentWorld::annoyIceMan() {
-	// NOT YET IMPLEMENTED
-}
-
-// Give IceMan some sonar charges.
-void StudentWorld::giveIceManSonar() {
-	// NOT YET IMPLEMENTED
-}
-
-// Give IceMan some water.
-void StudentWorld::giveIceManWater() {
-	// NOT YET IMPLEMENTED
-}
-
-// Is the Actor a facing toward the IceMan?
-bool StudentWorld::facingTowardIceMan(Actor* a) const {
-	// NOT YET IMPLEMENTED
-	return false;
-}
-
 // If the Actor a has a clear line of sight to the IceMan, return
 // the direction to the IceMan, otherwise GraphObject::none.
 GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
@@ -300,12 +279,6 @@ GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
 	return GraphObject::none;
 }
 
-// Return whether the Actor a is within radius of IceMan.
-bool StudentWorld::isNearIceMan(Actor* a, int radius) const {
-	// NOT YET IMPLEMENTED
-	return false;
-}
-
 // Determine the direction of the first move a quitting protester
 // makes to leave the oil field.
 GraphObject::Direction StudentWorld::determineFirstMoveToExit(int x, int y) {
@@ -315,7 +288,6 @@ GraphObject::Direction StudentWorld::determineFirstMoveToExit(int x, int y) {
 // Determine the direction of the first move a hardcore protester
 // makes to approach the IceMan.
 GraphObject::Direction StudentWorld::determineFirstMoveToIceMan(int x, int y, int depthLimit) {
-	// NOT YET IMPLEMENTED
 	return pathFind(x, y, player->getX(), player->getY(), depthLimit);
 }
 
@@ -599,66 +571,4 @@ void StudentWorld::getIceManLocation(int& x, int& y) const {
         x = player->getX();
         y = player->getY();
     }
-}
-
-// The following functions were rewriten and were themselves not utilized.
-
-// Helper for BFS
-struct Node {
-    int x, y;
-    int steps;
-    GraphObject::Direction firstDir;
-};
-
-int StudentWorld::stepsToTarget(int startX, int startY, int endX, int endY) const {
-    const int WIDTH = 64, HEIGHT = 64; // adjust as needed
-    bool visited[WIDTH][HEIGHT] = {false};
-    std::queue<Node> q;
-    q.push({startX, startY, 0, GraphObject::none});
-    visited[startX][startY] = true;
-
-    while (!q.empty()) {
-        Node curr = q.front(); q.pop();
-        if (curr.x == endX && curr.y == endY)
-            return curr.steps;
-
-        const int dx[4] = { -1, 1, 0, 0 };
-        const int dy[4] = { 0, 0, 1, -1 };
-        for (int dir = 0; dir < 4; ++dir) {
-            int nx = curr.x + dx[dir], ny = curr.y + dy[dir];
-            if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
-            if (visited[nx][ny]) continue;
-            if (!canActorMoveTo(nullptr, nx, ny)) continue;
-            visited[nx][ny] = true;
-            q.push({nx, ny, curr.steps + 1, curr.steps == 0 ? static_cast<GraphObject::Direction>(dir) : curr.firstDir});
-        }
-    }
-    return -1;
-}
-
-GraphObject::Direction StudentWorld::determineFirstMoveToTarget(int startX, int startY, int endX, int endY) const {
-    const int WIDTH = 64, HEIGHT = 64; // adjust as needed
-    bool visited[WIDTH][HEIGHT] = {false};
-    std::queue<Node> q;
-    q.push({startX, startY, 0, GraphObject::none});
-    visited[startX][startY] = true;
-
-    while (!q.empty()) {
-        Node curr = q.front(); q.pop();
-        if (curr.x == endX && curr.y == endY)
-            return curr.firstDir;
-
-        const int dx[4] = { -1, 1, 0, 0 };
-        const int dy[4] = { 0, 0, 1, -1 };
-        for (int dir = 0; dir < 4; ++dir) {
-            int nx = curr.x + dx[dir], ny = curr.y + dy[dir];
-            if (nx < 0 || nx >= WIDTH || ny < 0 || ny >= HEIGHT) continue;
-            if (visited[nx][ny]) continue;
-            if (!canActorMoveTo(nullptr, nx, ny)) continue;
-            visited[nx][ny] = true;
-            GraphObject::Direction firstDir = (curr.steps == 0) ? static_cast<GraphObject::Direction>(dir) : curr.firstDir;
-            q.push({nx, ny, curr.steps + 1, firstDir});
-        }
-    }
-    return GraphObject::none;
 }

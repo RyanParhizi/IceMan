@@ -194,7 +194,7 @@ public:
     ActivatingObject(StudentWorld* world, int startX, int startY, int imageID,
         int soundToPlay, bool activateOnPlayer,
         bool activateOnProtester, bool initallyActive);
-    virtual void doSomething();
+    virtual void doSomething() = 0;
 
     // Set number of ticks until this object dies
     void setTicksToLive();
@@ -208,7 +208,7 @@ private:
     bool activateOnPlayer;
     bool activateOnProtester;
     bool initiallyActive;
-    int ticksToLive; //whatShouldTheDefaultBe
+    int ticksToLive;
 };
 
 class OilBarrel : public ActivatingObject {

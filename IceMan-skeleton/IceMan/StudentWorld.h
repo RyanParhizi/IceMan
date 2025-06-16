@@ -48,24 +48,9 @@ public:
     // return a pointer to one of them, otherwise null.
     Actor* findNearbyPickerUpper(Actor* a, int radius) const;
 
-    // Annoy the IceMan.
-    void annoyIceMan();
-
-    // Give IceMan some sonar charges.
-    void giveIceManSonar();
-
-    // Give IceMan some water.
-    void giveIceManWater();
-
-    // Is the Actor a facing toward the IceMan?
-    bool facingTowardIceMan(Actor* a) const;
-
     // If the Actor a has a clear line of sight to the IceMan, return
     // the direction to the IceMan, otherwise GraphObject::none.
     GraphObject::Direction lineOfSightToIceMan(Actor* a) const;
-
-    // Return whether the Actor a is within radius of IceMan.
-    bool isNearIceMan(Actor* a, int radius) const;
 
     // Determine the direction of the first move a quitting protester
     // makes to leave the oil field.
@@ -77,12 +62,6 @@ public:
 
     // Returns Iceman's current location
     void getIceManLocation(int& x, int& y) const;
-
-    // Returns the number of steps from (startX, startY) to (endX, endY) using BFS, or -1 if unreachable
-    int stepsToTarget(int startX, int startY, int endX, int endY) const;
-
-    // Returns the first direction to move from (startX, startY) toward (endX, endY) along the shortest path
-    GraphObject::Direction determineFirstMoveToTarget(int startX, int startY, int endX, int endY) const;
 
     std::array<std::array<Ice*, 64>, 64>& getIceGrid() { return iceGrid; }
 
