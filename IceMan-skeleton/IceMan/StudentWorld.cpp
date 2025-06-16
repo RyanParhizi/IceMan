@@ -547,7 +547,7 @@ void StudentWorld::updateDisplayText() {
 void StudentWorld::addToScore(int amount) {
 	currentScore += amount;
 	increaseScore(amount); // Completely forgot these functions were inhereted. Most of the inhereted functionality was recreated in this class.
-}
+} // ^ ERROR: This isn't working and the GameWorld's currentScore is stuck at 0. StudentWorld's currentScore is fine.
 
 // Returns the first movement direction to get from (x1, y2) to (x2, y2)
 GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2, int depthLimit)
