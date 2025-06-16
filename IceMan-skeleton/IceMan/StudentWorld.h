@@ -18,7 +18,7 @@ public:
     virtual int move();
     virtual void cleanUp();
 
-    void increaseScore(int points) { currentScore += points; }
+    //void increaseScore(int points);
 
     int getLevel() const { return currentLevel; }
 
@@ -95,15 +95,9 @@ private:
     std::pair<int, int> findNewLocation(int x1, int y1, int x2, int y2, bool underIce);
 
     bool getTrueByChance(double chance);
-    void createHardcoreProtestor();
-    void createRegularProtestor();
-    void createSonarKit();
-    void createWaterPool();
     void addNewActors();
 
     void updateDisplayText();
-
-    void addToScore(int amount);
 
     GraphObject::Direction pathFind(int x1, int y1, int x2, int y2, int depthLimit);
    

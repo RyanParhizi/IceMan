@@ -72,7 +72,7 @@ int StudentWorld::move() {
 	// Lose Condition
 	if (player->getHitPoints() <= 0) { // Lose Condition
 		livesLeft--;
-		decLives(); // Completely forgot these functions were inhereted. Most of the inhereted functionality was recreated in this class.
+		decLives(); // Forgot this functions was inhereted. Most of the inhereted functionality was already recreated in this class.
 		playSound(SOUND_PLAYER_GIVE_UP);
 		return GWSTATUS_PLAYER_DIED;
 	}
@@ -264,9 +264,6 @@ GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
 	}
 
 	switch (relativeDirection) {
-	case GraphObject::none:
-		return GraphObject::none;
-		break;
 	case GraphObject::up:
 		for (int i = a->getY(); i <= player->getY(); i++) {
 			if (!canActorMoveTo(nullptr, a->getX(), i)) {
@@ -300,6 +297,7 @@ GraphObject::Direction StudentWorld::lineOfSightToIceMan(Actor* a) const {
 		return GraphObject::right;
 		break;
 	}
+	return GraphObject::none;
 }
 
 // Return whether the Actor a is within radius of IceMan.
@@ -462,25 +460,6 @@ bool StudentWorld::getTrueByChance(double chance) {
 	return (static_cast<double>(rand()) / RAND_MAX) < chance;
 }
 
-// This set of functions can probably be inlined
-
-void StudentWorld::createHardcoreProtestor() {
-	addActor(new HardcoreProtester(this, 60, 60, IID_HARD_CORE_PROTESTER));
-}
-
-void StudentWorld::createRegularProtestor() {
-	addActor(new RegularProtester(this, 60, 60, IID_PROTESTER));
-}
-
-void StudentWorld::createSonarKit() {
-	addActor(new SonarKit(this, 0, 60, currentLevel));
-}
-
-void StudentWorld::createWaterPool() {
-	std::pair<int, int> newLocation = findNewLocation(0, 0, 60, 60, false);
-	addActor(new WaterPool(this, newLocation.first, newLocation.second));
-}
-
 // Add new actors to the level according to ambient spawn mechanics
 void StudentWorld::addNewActors() {
 	
@@ -537,17 +516,11 @@ void StudentWorld::updateDisplayText() {
 		<< "Gld: " << setw(2) << player->getGold() << "  "
 		<< "Oil Left: " << setw(2) << m_oilBarrelsLeft << "  "
 		<< "Sonar: " << setw(2) << player->getSonar() << "  "
-		<< "Scr: " << setw(6) << setfill('0') << currentScore;
+		<< "Scr: " << setw(6) << setfill('0') << getScore();;
 
 	// Pass string stream to inherited function for update
 	setGameStatText(displayText.str());
 }
-
-// Adds amount to current score
-void StudentWorld::addToScore(int amount) {
-	currentScore += amount;
-	increaseScore(amount); // Completely forgot these functions were inhereted. Most of the inhereted functionality was recreated in this class.
-} // ^ ERROR: This isn't working and the GameWorld's currentScore is stuck at 0. StudentWorld's currentScore is fine.
 
 // Returns the first movement direction to get from (x1, y2) to (x2, y2)
 GraphObject::Direction StudentWorld::pathFind(int x1, int y1, int x2, int y2, int depthLimit)
