@@ -12,7 +12,7 @@ public:
         bool visible, int imageID, double size, int depth);
 
     // Action to perform each tick.
-    virtual void move() = 0;
+    virtual void doSomething() = 0;
 
     // Is this actor alive?
     bool isAlive() const { return m_isAlive; }
@@ -81,7 +81,7 @@ class IceMan : public Agent
 {
 public:
     IceMan(StudentWorld* world, int startX, int startY);
-    virtual void move();
+    virtual void doSomething();
     virtual bool annoy(unsigned int amount);
     virtual void addGold();
     virtual bool canDigThroughIce() { return true; }
@@ -113,7 +113,7 @@ class Protester : public Agent
 public:
     Protester(StudentWorld* world, int startX, int startY, int imageID,
         unsigned int hitPoints, unsigned int score);
-    virtual void move();
+    virtual void doSomething();
     virtual bool annoy(unsigned int amount);
     virtual void addGold();
     virtual bool huntsIceMan() const { return true; }
@@ -138,7 +138,7 @@ class RegularProtester : public Protester
 {
 public:
     RegularProtester(StudentWorld* world, int startX, int startY, int imageID);
-    virtual void move();
+    virtual void doSomething();
     virtual void addGold();
 
 protected:
@@ -149,7 +149,7 @@ class HardcoreProtester : public Protester
 {
 public:
     HardcoreProtester(StudentWorld* world, int startX, int startY, int imageID);
-    virtual void move();
+    virtual void doSomething();
     virtual void addGold();
 
 protected:
@@ -160,7 +160,7 @@ class Ice : public Actor
 {
 public:
     Ice(StudentWorld* world, int startX, int startY);
-    virtual void move();
+    virtual void doSomething();
 };
 
 class Boulder : public Actor
@@ -168,7 +168,7 @@ class Boulder : public Actor
 public:
     enum class State { stable, waiting, falling };
     Boulder(StudentWorld* world, int startX, int startY);
-    virtual void move();
+    virtual void doSomething();
     virtual bool canActorsPassThroughMe() const;
 private:
     State m_state = State::stable;
@@ -179,7 +179,7 @@ class Squirt : public Actor
 {
 public:
     Squirt(StudentWorld* world, int startX, int startY, Direction startDir);
-    virtual void move();
+    virtual void doSomething();
 
     virtual bool canHurtIceMan() const { return false; }
 
@@ -194,7 +194,7 @@ public:
     ActivatingObject(StudentWorld* world, int startX, int startY, int imageID,
         int soundToPlay, bool activateOnPlayer,
         bool activateOnProtester, bool initallyActive);
-    virtual void move();
+    virtual void doSomething();
 
     // Set number of ticks until this object dies
     void setTicksToLive();
@@ -214,7 +214,7 @@ private:
 class OilBarrel : public ActivatingObject {
 public:
     OilBarrel(StudentWorld* world, int startX, int startY);
-    virtual void move();
+    virtual void doSomething();
     virtual bool needsToBePickedUpToFinishLevel() const { return true; }
 };
 
@@ -222,7 +222,7 @@ class GoldNugget : public ActivatingObject {
 public:
     GoldNugget(StudentWorld* world, int startX, int startY, 
               bool temporary, bool pickupByIceMan, bool visible);
-    virtual void move();
+    virtual void doSomething();
 
 private:
     bool m_temporary;
@@ -232,7 +232,7 @@ private:
 class SonarKit : public ActivatingObject {
 public:
     SonarKit(StudentWorld* world, int startX, int startY, int currentLevel);
-    virtual void move();
+    virtual void doSomething();
 
 private:
     int m_ticksLeft;
@@ -242,7 +242,7 @@ class WaterPool : public ActivatingObject
 {
 public:
     WaterPool(StudentWorld* world, int startX, int startY);
-    virtual void move();
+    virtual void doSomething();
 };
 
 #endif // ACTOR_H_

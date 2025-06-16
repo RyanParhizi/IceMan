@@ -43,11 +43,11 @@ int StudentWorld::init() {
 
 int StudentWorld::move() {
 	// Have the player's IceMan do something
-	player->move();
+	player->doSomething();
 
 	// Have all the actors in the level do something
 	std::for_each(levelActors.begin(), levelActors.end(),
-		[](Actor* actor) { actor->move(); });
+		[](Actor* actor) { actor->doSomething(); });
 
 	// Remove all the dead actors in the level
 	levelActors.erase(std::remove_if(levelActors.begin(), levelActors.end(),

@@ -79,7 +79,7 @@ IceMan::IceMan(StudentWorld* world, int startX, int startY)
     : Agent(world, startX, startY, right, IID_PLAYER, 10) {
 
 }
-void IceMan::move() {
+void IceMan::doSomething() {
     if (!isAlive()) { return; }
 
     int key;
@@ -111,6 +111,7 @@ void IceMan::move() {
         break;
     case 'z': case 'Z':
         if (sonar > 0) {
+            getWorld()->playSound(SOUND_SONAR);
             getWorld()->revealAllNearbyObjects(getX(), getY(), 12);
             sonar--;
         }
@@ -172,7 +173,7 @@ Protester::Protester(StudentWorld* world, int startX, int startY, int imageID,
     turnCooldown = 0;
 }
 
-void Protester::move() {
+void Protester::doSomething() {
     if (!isAlive()) return;
 
     // 1. Resting state
@@ -342,8 +343,8 @@ RegularProtester::RegularProtester(StudentWorld* world, int startX, int startY, 
     : Protester(world, startX, startY, IID_PROTESTER, 5, 100) {
 
 }
-void RegularProtester::move() {
-    Protester::move();
+void RegularProtester::doSomething() {
+    Protester::doSomething();
 }
 
 void RegularProtester::addGold() {
@@ -360,8 +361,8 @@ HardcoreProtester::HardcoreProtester(StudentWorld* world, int startX, int startY
 {
 }
 
-void HardcoreProtester::move() {
-    Protester::move();
+void HardcoreProtester::doSomething() {
+    Protester::doSomething();
 }
 
 void HardcoreProtester::addGold() {
@@ -392,7 +393,7 @@ Ice::Ice(StudentWorld* world, int startX, int startY)
     : Actor(world, startX, startY, right, true, IID_ICE, 0.25, 3) { //Curious why GraphObject doesn't work.
 
 }
-void Ice::move() {
+void Ice::doSomething() {
 
 }
 
@@ -403,7 +404,7 @@ Boulder::Boulder(StudentWorld* world, int startX, int startY)
     : Actor(world, startX, startY, down, true, IID_BOULDER, 1, 1) {
 
 }
-void Boulder::move() {
+void Boulder::doSomething() {
     if (!isAlive()) {
         return;
     }
@@ -444,7 +445,7 @@ Squirt::Squirt(StudentWorld* world, int startX, int startY, Direction startDir)
         setDead();
     }
 }
-void Squirt::move() {
+void Squirt::doSomething() {
 
 
     if (spawnTickDelay) {
@@ -475,7 +476,7 @@ ActivatingObject::ActivatingObject(StudentWorld* world, int startX, int startY, 
     activateOnProtester(activateOnProtester), initiallyActive(initallyActive){
 
 }
-void ActivatingObject::move() {
+void ActivatingObject::doSomething() {
 
 }
 
@@ -493,7 +494,7 @@ OilBarrel::OilBarrel(StudentWorld* world, int startX, int startY)
     getWorld()->oilBarrelCreated();
 }
 
-void OilBarrel::move() {
+void OilBarrel::doSomething() {
     if (!isAlive()) return;
 
     if (!isVisible()) {
@@ -530,7 +531,7 @@ GoldNugget::GoldNugget(StudentWorld* world, int startX, int startY,
     }
 }
 
-void GoldNugget::move() {
+void GoldNugget::doSomething() {
     if (!isAlive()) return;
 
     if (!isVisible()) {
@@ -579,7 +580,7 @@ SonarKit::SonarKit(StudentWorld* world, int startX, int startY, int currentLevel
     setVisible(true);
 }
 
-void SonarKit::move() {
+void SonarKit::doSomething() {
     if (!isAlive()) return;
 
     // Check if Iceman is within 3.0 units
@@ -610,7 +611,7 @@ WaterPool::WaterPool(StudentWorld* world, int startX, int startY)
     setTicksToLive(ticks);
 }
 
-void WaterPool::move() 
+void WaterPool::doSomething() 
 {
     if (!isAlive()) return;
 
