@@ -543,6 +543,7 @@ void StudentWorld::updateDisplayText() {
 // Adds amount to current score
 void StudentWorld::addToScore(int amount) {
 	currentScore += amount;
+	increaseScore(amount); // Completely forgot these functions were inhereted. Most of the inhereted functionality was recreated in this class.
 }
 
 // Returns the first movement direction to get from (x1, y2) to (x2, y2)
