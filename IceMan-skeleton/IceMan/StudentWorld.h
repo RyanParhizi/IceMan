@@ -73,7 +73,7 @@ public:
 
     // Determine the direction of the first move a hardcore protester
     // makes to approach the IceMan.
-    GraphObject::Direction determineFirstMoveToIceMan(int x, int y);
+    GraphObject::Direction determineFirstMoveToIceMan(int x, int y, int depthLimit);
 
     // Returns Iceman's current location
     void getIceManLocation(int& x, int& y) const;
@@ -88,7 +88,6 @@ public:
 
     void oilBarrelCreated() { m_oilBarrelsLeft++; }
     bool allIceAtCoords(int x, int y, bool mod) const;
-
 
 private:
     void iceGridAction(bool option);
@@ -106,7 +105,7 @@ private:
 
     void addToScore(int amount);
 
-    GraphObject::Direction pathFind(int x1, int y1, int x2, int y2);
+    GraphObject::Direction pathFind(int x1, int y1, int x2, int y2, int depthLimit);
    
     IceMan* player = nullptr;
     std::array<std::array<Ice*, 64>, 64> iceGrid{};

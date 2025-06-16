@@ -130,6 +130,8 @@ protected:
     int shoutCooldown;
     int turnCooldown;
     int m_score;
+
+    virtual bool hardcoreFunctionality() = 0;
 };
 
 class RegularProtester : public Protester
@@ -138,6 +140,9 @@ public:
     RegularProtester(StudentWorld* world, int startX, int startY, int imageID);
     virtual void move();
     virtual void addGold();
+
+protected:
+    virtual bool hardcoreFunctionality() { return false; }
 };
 
 class HardcoreProtester : public Protester
@@ -146,6 +151,9 @@ public:
     HardcoreProtester(StudentWorld* world, int startX, int startY, int imageID);
     virtual void move();
     virtual void addGold();
+
+protected:
+    virtual bool hardcoreFunctionality();
 };
 
 class Ice : public Actor
